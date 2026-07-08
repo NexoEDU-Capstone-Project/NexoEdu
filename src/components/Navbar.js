@@ -48,7 +48,7 @@ const Navbar = {
 
         nav.querySelector("#logout-btn").addEventListener('click', (e) => {
             e.preventDefault()
-            if (confirm("EStas seguro que quieres cerra sesion?")) {
+            if (confirm("Estas seguro que quieres cerrar sesion?")) {
                 Auth.logout();
                 Router.navigate("/")
             }
