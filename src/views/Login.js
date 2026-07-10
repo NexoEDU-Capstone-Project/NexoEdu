@@ -36,16 +36,6 @@ const Login = {
                         Iniciar Sesión
                     </button>
                 </form>
-                <form id="login-form" class="space-y-6">
-                    <label class"block text-sm font-medium text-gray-700 mb-1">Country</label>
-                    <input id="country-input" type="text" placeholder="Sudan">
-                    <label class"block text-sm font-medium text-gray-700 mb-1">Capital</label>
-                    <input id="capital-input" type="text" placeholder="Khartoum">
-                    <button id="country-btn" type="submit" 
-                        class="w-full cursor-pointer bg-black hover:bg-gray-900 text-white font-bold py-3 transition-colors shadow-lg hover:shadow-xl active:transform active:scale-[0.98]">
-                        Añadir país
-                    </button>
-                </form>
             </div>
         `;
         this._bindEvents(container);
