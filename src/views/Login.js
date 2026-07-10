@@ -91,30 +91,6 @@ const Login = {
         container.addEventListener("keydown", (e) => {
             if (e.key === "Enter") btn.click()
         })
-
-        const addCountry = () => {
-        const countryName= container.querySelector("#country-input").value;
-        const capitalName= container.querySelector("#capital-input").value;
-
-        const country = {
-            name: countryName,
-            capital: capitalName
-        };
-
-        fetch("http://localhost:3000/countries", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(country)
-        });
-    };
-
-        const submitCountry = container.querySelector("#country-btn");
-        submitCountry.addEventListener("click", (e) => {
-            e.preventDefault();
-            addCountry();
-        });
     }
 }
 
