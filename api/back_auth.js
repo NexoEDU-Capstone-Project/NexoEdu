@@ -1,8 +1,9 @@
 // Endpoint para el login de usuarios
 
-const express = require('express');
+import express from 'express';
+import pool from '../app/db.js';
+
 const router = express.Router();
-const pool = require('../db');
 
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
@@ -45,4 +46,4 @@ router.post('/login', async (req, res) => {
 });
 
 // exportar el router para que pueda ser utilizado en index.js
-module.exports = router;
+export default router;
