@@ -1,6 +1,9 @@
-require('dotenv').config();
-const { Pool } = require('pg');
+// Importe de librerías necesarias para la conexión a la base de datos
+import 'dotenv/config';
+import pg from 'pg';
+const { Pool } = pg;
 
+// Objeto que contiene la configuración de la conexión a la base de datos PostgreSQL, utilizando variables de entorno para mayor seguridad y flexibilidad.
 const pool = new Pool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
@@ -9,4 +12,5 @@ const pool = new Pool({
   database: process.env.DB_NAME,
 });
 
-module.exports = pool;
+// Exportación del objeto
+export default pool;
