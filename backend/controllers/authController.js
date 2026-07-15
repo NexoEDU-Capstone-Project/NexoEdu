@@ -1,85 +1,79 @@
-import * as AuthModel from '../models/authModel.js'
-import jwt from 'jsonwebtoken'
+import * as AuthModel from '../models/authModel.js';
+import jwt from 'jsonwebtoken';
+import { cookieOptions } from '../config/cookieOptions.js';
 
 // Controlador para manejar el login de usuarios
 export async function login(req, res) {
-    // Extraer el nombre de usuario y la contraseña del cuerpo de la solicitud
-    const { username, password } = req.body;
+    const { username, password } = req.body; // Extraer el nombre de usuario y la contraseña del cuerpo de la solicitud
 
-    // Validar que se proporcionen tanto el nombre de usuario como la contraseña
-    if (!username || !password) {
+    if (!username || !password) { // Validar que se proporcionen tanto el nombre de usuario como la contraseña
         return res.status(400).json({ error: 'Usuario y contraseña son requeridos' });
     }
 
-    // Intentar buscar al usuario en la base de datos y verificar la contraseña
-    try {
-        // Buscar al usuario por nombre de usuario
-        const usuario = await AuthModel.buscarPorUsername(username);
+    try {  // Intentar buscar al usuario en la base de datos y verificar la contraseña
+        const usuario = await AuthModel.buscarPorUsername(username); // Buscar al usuario por nombre de usuario
 
-        // Si el usuario no existe o la contraseña no coincide, devolver un error de autenticación
-        if (!usuario || usuario.password !== password) {
+        if (!usuario || usuario.password !== password) { // Si el usuario no existe o la contraseña no coincide, devolver un error de autenticación
             return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
         }
 
-        // Si la autenticación es correcta, devolver el nombre de usuario y el rol junto al jwt
-        const payload= { username: usuario.username, rol: usuario.rol } 
-        const accessToken= jwt.sign(
-            payload, 
+        const payload = { username: usuario.username, rol: usuario.rol } // Crear el payload para el token JWT con el nombre de usuario y el rol del usuario
+
+        const accessToken = jwt.sign( // Generar un token de acceso JWT con el payload, la clave secreta y el tiempo de expiración
+            payload,
             process.env.JWT_SECRET, //Claves almacenadas en variables de entorno (.env)
             { expiresIn: process.env.JWT_EXPIRES_IN })
-            
-        const refreshToken= jwt.sign( //Maneja mas de una sesión sin pedir loguearse nuevamente
-            payload, 
-            process.env.JWT_REFRESH_SECRET, 
+
+        const refreshToken = jwt.sign( //Maneja mas de una sesión sin pedir loguearse nuevamente
+            payload,
+            process.env.JWT_REFRESH_SECRET,
             { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN })
 
         return res
-        .cookie("accessToken", accessToken, {
-            httpOnly: true, //Acceso exclusivo desde el backend, y el sameSite para delimitarlo al dominio
-            secure: process.env.NODE_ENV=== "production", //Limita el acceso a solo https
-            sameSite: "strict",
-            maxAge: 60 * 60 * 1000
-        })
-        .json({
-            message: "Login exitoso",
-            accessToken,
-            refreshToken,
-            user: {
-                username: usuario.username,
-                rol: usuario.rol
-            }
-        })
+            .cookie("accessToken", accessToken, cookieOptions)
+            .json({
+                message: "Login exitoso",
+                accessToken,
+                refreshToken,
+                user: {
+                    username: usuario.username,
+                    rol: usuario.rol
+                }
+            })
     } catch (error) {
         // Manejar cualquier error que ocurra durante el proceso de login
         console.error(error);
-        res.status(500).json({ error: 'Error al procesar el login' });
+        return res.status(500).json({ error: 'Error al procesar el login' });
     }
-    return res
+
 }
-export function refresh(req, res){
-    const {refreshToken}= req.body
-    if(!refreshToken){ 
-        return res.status(401).json({error: 'Usuario sin token'})
+
+// Controlador para manejar la renovación del token de acceso usando el refresh token
+export function refresh(req, res) {
+    const { refreshToken } = req.body
+    if (!refreshToken) {
+        return res.status(401).json({ error: 'Usuario sin token' })
     }
     try {
-        const data= jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET)
-        const newToken= jwt.sign(
-            {username: data.username, rol: data.rol},
+        const data = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET)
+        const newToken = jwt.sign(
+            { username: data.username, rol: data.rol },
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_EXPIRES_IN }
         )
         return res
-            .cookie('accessToken', newToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
-                maxAge: 60 * 60 * 1000
-            })
+            .cookie('accessToken', newToken, cookieOptions)
             .json({ accessToken: newToken })
     }
-    catch (error){
+    catch (error) {
         console.error('Refresh token inválido ->', error.message)
         return res.status(401).json({ error: 'Refresh token inválido' })
     }
-    
+
+}
+// Controlador para manejar el cierre de sesión de usuarios
+export function logout(req, res) {
+    res
+        .clearCookie('accessToken', cookieOptions)
+        .json({ message: 'Sesión cerrada correctamente.' });
 }
