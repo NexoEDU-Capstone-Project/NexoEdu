@@ -2,7 +2,7 @@ import { API_URL } from "./auth.js";
 const http= {
     async request (method, endpoint, body = null) {
         const options = {
-            method, //specifies method in function call
+            method, //se especifica el método al llamar a la funcion
             headers: {
                 "Content-Type": "application/json"
             }

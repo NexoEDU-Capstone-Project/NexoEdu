@@ -23,5 +23,9 @@
   "homepage": "https://github.com/Proyecto-Integrador-Riwi/Riwi-Projects#readme",
   "devDependencies": {
     "concurrently": "^10.0.3"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "jsonwebtoken": "^9.0.3"
   }
 }

@@ -20,7 +20,7 @@ const Sidebar= {
         if(user.role=== "superadmin"){
             sidebar.innerHTML= `
                 <li>
-                    <a id="superadmin_dashboard" href="/dashboard-escuelas" class="block px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors duration-200">
+                    <a id="superadmin_dashboard" href="/dashboard-general" class="block px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors duration-200">
                         Dashboard
                     </a>
                 </li>
@@ -60,7 +60,7 @@ const Sidebar= {
         else if(user.role=== "estudiante"){
             sidebar.innerHTML= `
                 <li>
-                    <a id="events" href="/eventos" class="block px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors duration-200">
+                    <a id="events" href="/ver-eventos" class="block px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors duration-200">
                         Eventos
                     </a>
                 </li>`
