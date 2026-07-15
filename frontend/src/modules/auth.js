@@ -1,4 +1,10 @@
 export const API_URL = "http://localhost:3000"
+import { supabase } from '../services/supabase.js'
+
+export const loginUser = async (email, password) => {
+    console.log('Conectando a Supabase...', supabase)
+    // Tu lógica de login
+}
 
 const Auth = {
     _currentUser: null,
