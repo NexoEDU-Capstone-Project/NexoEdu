@@ -1,19 +1,31 @@
-// Importa las dependencias necesarias para la aplicación
+// Importaciones de dependencias y configuración del entorno
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger.js';
+
+
+// Importaciones de rutas y controladores
 import authRoutes from './routes/authRoutes.js';
-import cookieParser from 'cookie-parser'
+import institutionRoutes from './routes/institutionRoutes.js';
+
+/* Habilitar con los endpoints comentados
 import authToken from './middleware/authMiddleware.js'
 import protectedRoute from './routes/protectedRoutes.js';
 import requireRole from './middleware/requireRole.js';
+*/
 
 // Crea una instancia de la aplicación Express
-const app = express();
+const app = express();  
 // Configura CORS para permitir solicitudes desde el frontend, incluyendo credenciales (cookies)
 app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 app.use(express.json());
 app.use(cookieParser())
+
+// Configuración de Swagger para la documentación de la API
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Ruta de prueba para verificar que el servidor funciona
 app.get('/api/test', (req, res) => {
@@ -23,6 +35,8 @@ app.get('/api/test', (req, res) => {
 // Rutas de autenticación y manejo de sesiones
 app.use('/api/auth', authRoutes);
 
+// Rutas de instituciones, protegidas por autenticación y autorización
+app.use('/api/institutions', institutionRoutes);
 /*
 Futuros endpoints
 app.get('/dashboard-general', authToken, requireRole('SUPERADMIN'), protectedRoute('dashboard-general'))
