@@ -5,11 +5,17 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger.js';
+import pool from './db.js'
+
 
 // Importaciones de rutas y controladores
 import authRoutes from './routes/authRoutes.js';
 import institutionRoutes from './routes/institutionRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+
+pool.query('SELECT NOW()')
+.then(({ rows }) => console.log('✅ DB conectada:', rows[0].now))
+.catch((err) => console.error('❌ Error:', err.message))
 
 // Crea una instancia de la aplicación Express
 const app = express();  
@@ -34,9 +40,6 @@ app.use('/api/institutions', institutionRoutes);
 
 // Rutas de administración, protegidas por autenticación y autorización
 app.use('/api/admins', adminRoutes);
-
-
-
 
 // Manejo de errores
 app.use((err, req, res, next) => {

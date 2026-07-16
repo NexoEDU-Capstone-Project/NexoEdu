@@ -1,10 +1,7 @@
 import jwt from 'jsonwebtoken'
 
 export default function authToken(req, res, next){
-    const authHeader = req.headers.authorization;
-    const tokenFromCookie = req.cookies?.accessToken;  //Extrae la cookie creada al iniciar sesión satisfactoriamente
-    const tokenFromHeader = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-    const token = tokenFromCookie || tokenFromHeader //Busca tanto el token de la cookie como del header en caso de que uno no se almacene
+    const token= req.cookies?.accessToken;  //Extrae la cookie creada al iniciar sesión
 
     if(!token){
         return res.status(401).json({message: "Usuario sin token"})
