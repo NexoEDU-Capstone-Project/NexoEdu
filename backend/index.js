@@ -6,16 +6,10 @@ import cookieParser from 'cookie-parser';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger.js';
 
-
 // Importaciones de rutas y controladores
 import authRoutes from './routes/authRoutes.js';
 import institutionRoutes from './routes/institutionRoutes.js';
-
-/* Habilitar con los endpoints comentados
-import authToken from './middleware/authMiddleware.js'
-import protectedRoute from './routes/protectedRoutes.js';
-import requireRole from './middleware/requireRole.js';
-*/
+import adminRoutes from './routes/adminRoutes.js';
 
 // Crea una instancia de la aplicación Express
 const app = express();  
@@ -37,18 +31,12 @@ app.use('/api/auth', authRoutes);
 
 // Rutas de instituciones, protegidas por autenticación y autorización
 app.use('/api/institutions', institutionRoutes);
-/*
-Futuros endpoints
-app.get('/dashboard-general', authToken, requireRole('SUPERADMIN'), protectedRoute('dashboard-general'))
-app.get('/gestion-eventos', authToken, requireRole('SUPERADMIN'), protectedRoute('gestion-eventos'))
-app.get('/gestion-escuelas', authToken, requireRole('SUPERADMIN'), protectedRoute('gestion-escuelas'))
 
-app.get('/dashboard-escuela', authToken, requireRole('ADMIN'), protectedRoute('dashboard-escuela'))
-app.get('/gestion-estudiantes', authToken, requireRole('ADMIN'), protectedRoute('gestion-estudiantes'))
-app.get('/eventos-propios', authToken, requireRole('ADMIN'), protectedRoute('eventos-propios'))
+// Rutas de administración, protegidas por autenticación y autorización
+app.use('/api/admins', adminRoutes);
 
-app.get('/ver-eventos', authToken, requireRole('ESTUDIANTE'), protectedRoute('ver-eventos'))
-*/
+
+
 
 // Manejo de errores
 app.use((err, req, res, next) => {
