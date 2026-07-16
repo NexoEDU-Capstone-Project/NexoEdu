@@ -5,8 +5,8 @@ import requireRole from '../middleware/requireRole.js';
 
 const router = express.Router();
 
-router.post('/', authToken, requireRole('SUPERADMIN'), crearAdmin);
-router.put('/:id/assign', authToken, requireRole('SUPERADMIN'), asignarInstitucion);
-router.delete('/:id', authToken, requireRole('SUPERADMIN'), eliminarAdmin);
+router.post('/', authToken, requireRole('superadmin'), crearAdmin);
+router.put('/:id/assign', authToken, requireRole('superadmin'), asignarInstitucion);
+router.delete('/:id', authToken, requireRole('superadmin'), eliminarAdmin);
 
 export default router;

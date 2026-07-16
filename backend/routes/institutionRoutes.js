@@ -7,8 +7,8 @@ const router = express.Router();
 
 router.get('/', authToken, InstitutionController.listar);
 router.get('/:id', authToken, InstitutionController.obtenerUna);
-router.post('/', authToken, requireRole('SUPERADMIN'), InstitutionController.crear);
-router.put('/:id', authToken, requireRole('SUPERADMIN'), InstitutionController.actualizar);
-router.delete('/:id', authToken, requireRole('SUPERADMIN'), InstitutionController.eliminar);
+router.post('/', authToken, requireRole('superadmin'), InstitutionController.crear);
+router.put('/:id', authToken, requireRole('superadmin'), InstitutionController.actualizar);
+router.delete('/:id', authToken, requireRole('superadmin'), InstitutionController.eliminar);
 
 export default router;
