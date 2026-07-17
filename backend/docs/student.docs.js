@@ -2,7 +2,7 @@
  * @openapi
  * /api/students:
  *   get:
- *     summary: Obtiene todos los estudiantes de la institución del admin autenticado (solo ADMINISTRADOR)
+ *     summary: Lista estudiantes. Superadmin ve todos; administrador ve solo los de su institución
  *     tags: [Students]
  *     responses:
  *       200:
@@ -10,11 +10,11 @@
  *       401:
  *         description: No autenticado
  *       403:
- *         description: No tienes permiso (solo ADMINISTRADOR) o el admin no tiene institución asignada
+ *         description: Sin permiso, o el admin no tiene institución asignada
  *       500:
  *         description: Error interno del servidor
  *   post:
- *     summary: Crea un nuevo perfil de estudiante en la institución del admin autenticado (solo ADMINISTRADOR)
+ *     summary: Crea un nuevo perfil de estudiante (superadmin o administrador)
  *     tags: [Students]
  *     requestBody:
  *       required: true
@@ -28,6 +28,10 @@
  *                 type: integer
  *                 description: ID de la persona a convertir en estudiante
  *                 example: 15
+ *               institution_id:
+ *                 type: integer
+ *                 description: Requerido si quien crea es superadmin (el admin usa su propia institución automáticamente)
+ *                 example: 1
  *               status_id:
  *                 type: integer
  *                 example: 1
@@ -49,11 +53,11 @@
  *       201:
  *         description: Estudiante creado correctamente
  *       400:
- *         description: Datos incompletos, inválidos o end_date anterior a start_date
+ *         description: Datos incompletos, inválidos, end_date anterior a start_date, o falta institution_id (superadmin)
  *       401:
  *         description: No autenticado
  *       403:
- *         description: No tienes permiso (solo ADMINISTRADOR) o el admin no tiene institución asignada
+ *         description: Sin permiso, o el admin no tiene institución asignada
  *       404:
  *         description: people_id, grade_id o status_id no existen
  *       409:
@@ -66,7 +70,7 @@
  * @openapi
  * /api/students/{id}:
  *   get:
- *     summary: Obtiene un estudiante por el ID de su perfil, dentro de la institución del admin (solo ADMINISTRADOR)
+ *     summary: Obtiene un estudiante por su ID. Superadmin ve cualquiera; administrador solo si es de su institución
  *     tags: [Students]
  *     parameters:
  *       - in: path
@@ -81,13 +85,13 @@
  *       401:
  *         description: No autenticado
  *       403:
- *         description: No tienes permiso (solo ADMINISTRADOR) o el admin no tiene institución asignada
+ *         description: Sin permiso, o el admin no tiene institución asignada
  *       404:
  *         description: Estudiante no encontrado
  *       500:
  *         description: Error interno del servidor
  *   put:
- *     summary: Actualiza el estado, grado o fechas de un estudiante existente (solo ADMINISTRADOR)
+ *     summary: Actualiza estado, grado o fechas de un estudiante existente (superadmin o administrador)
  *     tags: [Students]
  *     parameters:
  *       - in: path
@@ -127,13 +131,13 @@
  *       401:
  *         description: No autenticado
  *       403:
- *         description: No tienes permiso (solo ADMINISTRADOR) o el admin no tiene institución asignada
+ *         description: Sin permiso, o el admin no tiene institución asignada
  *       404:
  *         description: Estudiante no encontrado, o grade_id/status_id no existen
  *       500:
  *         description: Error interno del servidor
  *   delete:
- *     summary: Elimina un perfil de estudiante por su ID (solo ADMINISTRADOR)
+ *     summary: Elimina un perfil de estudiante por su ID (superadmin o administrador)
  *     tags: [Students]
  *     parameters:
  *       - in: path
@@ -148,7 +152,7 @@
  *       401:
  *         description: No autenticado
  *       403:
- *         description: No tienes permiso (solo ADMINISTRADOR) o el admin no tiene institución asignada
+ *         description: Sin permiso, o el admin no tiene institución asignada
  *       404:
  *         description: Estudiante no encontrado
  *       409:
