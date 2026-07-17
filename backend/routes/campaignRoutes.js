@@ -6,6 +6,7 @@ import requireRole from '../middleware/requireRole.js';
 const router = express.Router();
 
 router.get('/', authToken, CampaignController.listar);
+router.get('/mine', authToken, requireRole('estudiante'), CampaignController.misCampanas);
 router.get('/:id', authToken, CampaignController.obtenerUna);
 router.post('/', authToken, requireRole('superadmin', 'administrador'), CampaignController.crear);
 router.post('/:id/criteria', authToken, requireRole('superadmin', 'administrador'), CampaignController.crearCriteria);

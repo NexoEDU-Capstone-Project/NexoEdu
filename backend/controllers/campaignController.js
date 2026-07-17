@@ -25,24 +25,26 @@ export async function crear(req, res) {
     }
 
     try {
-        const campaign = await CampaignModel.crear({
+        const campaign = await CampaignModel.crearConScope({
             title, type, description, sponsor, start_date, end_date, url_multimedia,
-            created_by_credentials_id: req.user.id
-        });
-
-        const scope = await CampaignModel.crearScope({
-            campaign_id: campaign.id,
+            created_by_credentials_id: req.user.id,
             scope_type,
             institution_id,
             neighborhood_id: scope_type === 'NEIGHBORHOOD' ? neighborhood_id : null,
             localities_id: scope_type === 'LOCALITY' ? localities_id : null
         });
 
-        res.status(201).json({ ...campaign, scope });
+        res.status(201).json(campaign);
     } catch (error) {
         console.error(error);
-        if (error.code === '23514') { // violación de CHECK constraint
+        if (error.code === '23514') {
             return res.status(400).json({ error: 'Combinación de alcance inválida' });
+        }
+        if (error.code === '23503') {
+            return res.status(404).json({ error: 'institution_id, neighborhood_id o localities_id no existen' });
+        }
+        if (error.code === '23505') {
+            return res.status(409).json({ error: 'Ya existe una campaña con ese título' });
         }
         res.status(500).json({ error: 'Error al crear la campaña' });
     }
@@ -105,5 +107,17 @@ export async function obtenerCriteria(req, res) {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Error al obtener los criterios de la campaña' });
+    }
+}
+
+export async function misCampanas(req, res) {
+    if (!req.user.people_id) {
+        return res.status(403).json({ error: 'Tu credencial no está asociada a una persona' });
+    }
+    try {
+        res.json(await CampaignModel.obtenerElegibles(req.user.people_id));
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al obtener tus campañas' });
     }
 }

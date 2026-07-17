@@ -1,5 +1,5 @@
 import * as StudentModel from '../models/studentModel.js'
-
+import * as CampaignModel from '../models/campaignModel.js'
 export async function listar(req, res) {
     try {
         const page = Math.max(parseInt(req.query.page) || 1, 1);
@@ -148,5 +148,21 @@ export async function eliminar(req, res) {
             return res.status(409).json({ error: 'No se puede eliminar ya que estudiante tiene registros asociados (campañas, actualizaciones, etc...)' })
         }
         res.status(500).json({ error: 'Error al eliminar el estudiante' })
+    }
+}
+
+export async function campanasElegibles(req, res) {
+    try {
+        const institutionId = req.user.rol === 'superadmin' ? null : req.user.institution_id;
+        const estudiante = institutionId
+            ? await StudentModel.obtenerPorId(req.params.id, institutionId)
+            : await StudentModel.obtenerPorIdTodas(req.params.id);
+
+        if (!estudiante) return res.status(404).json({ error: 'Estudiante no encontrado' });
+
+        res.json(await CampaignModel.obtenerElegibles(estudiante.people_id));
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al obtener campañas elegibles' });
     }
 }
