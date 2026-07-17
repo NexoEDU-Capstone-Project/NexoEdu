@@ -77,3 +77,83 @@
  *       404:
  *         description: Campaña no encontrada
  */
+
+/**
+ * @openapi
+ * /api/campaigns/{id}/criteria:
+ *   post:
+ *     summary: Define los criterios demográficos de una campaña (solo el creador o superadmin)
+ *     tags: [Campaigns]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               gender_id:
+ *                 type: integer
+ *               min_age:
+ *                 type: integer
+ *               max_age:
+ *                 type: integer
+ *               grade_id:
+ *                 type: integer
+ *               status_id:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: Criterios creados
+ *       400:
+ *         description: min_age mayor a max_age
+ *       403:
+ *         description: No eres el creador de la campaña ni superadmin
+ *       404:
+ *         description: Campaña, género, grado o estado no encontrado
+ */
+
+/**
+ * @openapi
+ * /api/campaigns/{id}/criteria:
+ *   get:
+ *     summary: Obtiene los criterios demográficos de una campaña
+ *     tags: [Campaigns]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Criterios de la campaña
+ *       404:
+ *         description: La campaña no tiene criterios definidos
+ */
+/**
+ * @openapi
+ * /api/campaigns/{id}/enroll:
+ *   post:
+ *     summary: El estudiante se inscribe a una campaña para la que es elegible
+ *     tags: [Campaigns]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Inscripción registrada
+ *       403:
+ *         description: No eres elegible para esta campaña, o tu credencial no está asociada a una persona
+ *       404:
+ *         description: No se encontró tu perfil de estudiante
+ *       409:
+ *         description: Ya estás inscrito en esta campaña
+ */

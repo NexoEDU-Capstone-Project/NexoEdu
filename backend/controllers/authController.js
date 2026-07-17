@@ -22,7 +22,8 @@ export async function login(req, res) {
             id: usuario.id,
             username: usuario.username,
             rol: usuario.rol,
-            institution_id: usuario.institution_id
+            institution_id: usuario.institution_id,
+            people_id: usuario.people_id
         };
 
         const accessToken = jwt.sign( // Generar un token de acceso JWT con el payload, la clave secreta y el tiempo de expiración
@@ -61,9 +62,9 @@ export function refresh(req, res) {
         return res.status(401).json({ error: 'Usuario sin token' })
     }
     try {
-        const data = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET)
+        const { iat, exp, ...payload } = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET)
         const newToken = jwt.sign(
-            { username: data.username, rol: data.rol },
+            payload,
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_EXPIRES_IN }
         )
@@ -75,7 +76,6 @@ export function refresh(req, res) {
         console.error('Refresh token inválido ->', error.message)
         return res.status(401).json({ error: 'Refresh token inválido' })
     }
-
 }
 // Controlador para manejar el cierre de sesión de usuarios
 export function logout(req, res) {
