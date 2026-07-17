@@ -13,6 +13,7 @@ import authRoutes from './routes/authRoutes.js';
 import institutionRoutes from './routes/institutionRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import campaignRoutes from './routes/campaignRoutes.js';
+import studentRoutes from './routes/studentRoutes.js'
 
 pool.query('SELECT NOW()')
 .then(({ rows }) => console.log('✅ DB conectada:', rows[0].now))
@@ -39,11 +40,14 @@ app.use('/api/auth', authRoutes);
 // Rutas de instituciones, protegidas por autenticación y autorización
 app.use('/api/institutions', institutionRoutes);
 
-// Rutas de administración, protegidas por autenticación y autorización
+// Rutas de administración
 app.use('/api/admins', adminRoutes);
 
-// Rutas de campañas, protegidas por autenticación y autorización
+// Rutas de campañas
 app.use('/api/campaigns', campaignRoutes);
+
+// Rutas de estudiantes, igualmente protegidas
+app.use('api/students', studentRoutes) 
 
 // Manejo de errores
 app.use((err, req, res, next) => {
