@@ -14,9 +14,9 @@ export async function crearAdmin(req, res) {
             return res.status(409).json({ error: 'El nombre de usuario ya existe' });
         }
 
-        const roleId = await obtenerRolId('ADMINISTRADOR');
+        const roleId = await obtenerRolId('administrador');
         if (!roleId) {
-            return res.status(500).json({ error: 'Error de configuración: rol ADMINISTRADOR no encontrado' });
+            return res.status(500).json({ error: 'Error de configuración: rol administrador no encontrado' });
         }
 
         if (institution_id) {
@@ -37,7 +37,7 @@ export async function crearAdmin(req, res) {
         }
 
         res.status(201).json({
-            message: 'Administrador creado exitosamente',
+            message: 'administrador creado exitosamente',
             admin: { id: credencial.id, username: credencial.username },
             institucion: institucion
                 ? { id: institucion.id, institution_name: institucion.institution_name }
@@ -69,7 +69,7 @@ export async function asignarInstitucion(req, res) {
             return res.status(404).json({ error: 'Institución no encontrada' });
         }
         res.json({
-            message: 'Administrador asignado a la institución exitosamente',
+            message: 'administrador asignado a la institución exitosamente',
             institucion
         });
     } catch (error) {
@@ -86,12 +86,12 @@ export async function asignarInstitucion(req, res) {
 
 export async function eliminarAdmin(req, res) {
     try {
-        const roleId = await obtenerRolId('ADMINISTRADOR');
+        const roleId = await obtenerRolId('administrador');
         const admin = await AdminModel.eliminar(req.params.id, roleId);
         if (!admin) {
-            return res.status(404).json({ error: 'Administrador no encontrado' });
+            return res.status(404).json({ error: 'administrador no encontrado' });
         }
-        res.json({ message: 'Administrador eliminado', admin });
+        res.json({ message: 'administrador eliminado', admin });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Error al eliminar el administrador' });
