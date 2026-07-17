@@ -5,10 +5,10 @@ import requireRole from '../middleware/requireRole.js'
 
 const router= express.Router()
 
-router.get('/', authToken, requireRole('administrador'), StudentController.listar)
-router.get('/:id', authToken, requireRole('administrador'), StudentController.obtenerUno)
-router.post('/', authToken, requireRole('administrador'), StudentController.crear)
-router.put('/:id', authToken, requireRole('administrador'), StudentController.actualizar)
-router.delete('/:id', authToken, requireRole('administrador'), StudentController.eliminar)
+router.get('/', authToken, requireRole('superadmin', 'administrador'), StudentController.listar)
+router.get('/:id', authToken, requireRole('superadmin', 'administrador'), StudentController.obtenerUno)
+router.post('/', authToken, requireRole('superadmin', 'administrador'), StudentController.crear)
+router.put('/:id', authToken, requireRole('superadmin', 'administrador'), StudentController.actualizar)
+router.delete('/:id', authToken, requireRole('superadmin', 'administrador'), StudentController.eliminar)
 
 export default router
