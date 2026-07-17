@@ -12,6 +12,7 @@ import pool from './db.js'
 import authRoutes from './routes/authRoutes.js';
 import institutionRoutes from './routes/institutionRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import campaignRoutes from './routes/campaignRoutes.js';
 
 pool.query('SELECT NOW()')
 .then(({ rows }) => console.log('✅ DB conectada:', rows[0].now))
@@ -40,6 +41,9 @@ app.use('/api/institutions', institutionRoutes);
 
 // Rutas de administración, protegidas por autenticación y autorización
 app.use('/api/admins', adminRoutes);
+
+// Rutas de campañas, protegidas por autenticación y autorización
+app.use('/api/campaigns', campaignRoutes);
 
 // Manejo de errores
 app.use((err, req, res, next) => {

@@ -17,7 +17,13 @@ export async function login(req, res) {
             return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
         }
 
-        const payload = { username: usuario.username, rol: usuario.rol } // Crear el payload para el token JWT con el nombre de usuario y el rol del usuario
+        // authController.js, en login()
+        const payload = {
+            id: usuario.id,
+            username: usuario.username,
+            rol: usuario.rol,
+            institution_id: usuario.institution_id
+        };
 
         const accessToken = jwt.sign( // Generar un token de acceso JWT con el payload, la clave secreta y el tiempo de expiración
             payload,
