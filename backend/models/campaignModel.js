@@ -40,3 +40,20 @@ export async function obtenerPorId(id) {
     );
     return resultado.rows[0];
 }
+
+export async function crearCriteria({ campaign_id, gender_id, min_age, max_age, grade_id, status_id }) {
+    const resultado = await pool.query(
+        `INSERT INTO campaign_criteria (campaign_id, gender_id, min_age, max_age, grade_id, status_id)
+     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+        [campaign_id, gender_id ?? null, min_age ?? null, max_age ?? null, grade_id ?? null, status_id ?? null]
+    );
+    return resultado.rows[0];
+}
+
+export async function obtenerCriteria(campaign_id) {
+    const resultado = await pool.query(
+        'SELECT * FROM campaign_criteria WHERE campaign_id = $1',
+        [campaign_id]
+    );
+    return resultado.rows[0];
+}

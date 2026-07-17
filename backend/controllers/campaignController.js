@@ -67,3 +67,43 @@ export async function obtenerUna(req, res) {
         res.status(500).json({ error: 'Error al obtener la campaña' });
     }
 }
+
+export async function crearCriteria(req, res) {
+    const { gender_id, min_age, max_age, grade_id, status_id } = req.body;
+    const campaignId = req.params.id;
+
+    try {
+        const campana = await CampaignModel.obtenerPorId(campaignId);
+        if (!campana) return res.status(404).json({ error: 'Campaña no encontrada' });
+
+        if (req.user.rol !== 'superadmin' && campana.created_by_credentials_id !== req.user.id) {
+            return res.status(403).json({ error: 'Solo el creador de la campaña o un superadmin pueden definir sus criterios' });
+        }
+
+        const criterio = await CampaignModel.crearCriteria({
+            campaign_id: campaignId, gender_id, min_age, max_age, grade_id, status_id
+        });
+
+        res.status(201).json(criterio);
+    } catch (error) {
+        console.error(error);
+        if (error.code === '23514') {
+            return res.status(400).json({ error: 'min_age no puede ser mayor a max_age' });
+        }
+        if (error.code === '23503') {
+            return res.status(404).json({ error: 'gender_id, grade_id o status_id no existen' });
+        }
+        res.status(500).json({ error: 'Error al crear los criterios de la campaña' });
+    }
+}
+
+export async function obtenerCriteria(req, res) {
+    try {
+        const criterio = await CampaignModel.obtenerCriteria(req.params.id);
+        if (!criterio) return res.status(404).json({ error: 'Esta campaña no tiene criterios definidos' });
+        res.json(criterio);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al obtener los criterios de la campaña' });
+    }
+}

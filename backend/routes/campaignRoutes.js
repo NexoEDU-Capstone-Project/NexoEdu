@@ -8,5 +8,7 @@ const router = express.Router();
 router.get('/', authToken, CampaignController.listar);
 router.get('/:id', authToken, CampaignController.obtenerUna);
 router.post('/', authToken, requireRole('superadmin', 'administrador'), CampaignController.crear);
+router.post('/:id/criteria', authToken, requireRole('superadmin', 'administrador'), CampaignController.crearCriteria);
+router.get('/:id/criteria', authToken, CampaignController.obtenerCriteria);
 
 export default router;
