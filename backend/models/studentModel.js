@@ -1,31 +1,46 @@
 import pool from '../db.js';
 
-export async function obtenerPorInstitucion(institution_id) {
+export async function obtenerPorInstitucion(institution_id, { search = '', limit = 10, offset = 0 } = {}) {
     const resultado = await pool.query(
-        `SELECT sp.*, p.first_name, p.last_name, p.email,
-        g.grade, s.status
+        `SELECT sp.*, p.first_name, p.last_name, p.email, p.document_number,
+        g.grade, s.status,
+        COUNT(*) OVER() AS total_count
         FROM student_profiles sp
         JOIN people p ON p.id = sp.people_id
         JOIN grades g ON g.id = sp.grade_id
         JOIN statuses s ON s.id = sp.status_id
         WHERE sp.institution_id = $1
-        ORDER BY p.last_name, p.first_name`,
-        [institution_id]
+        AND ($2 = '' OR p.first_name ILIKE '%' || $2 || '%'
+        OR p.last_name ILIKE '%' || $2 || '%'
+        OR p.document_number ILIKE '%' || $2 || '%')
+        ORDER BY p.last_name, p.first_name
+        LIMIT $3 OFFSET $4`,
+        [institution_id, search, limit, offset]
     );
-    return resultado.rows;
+    const total = resultado.rows[0]?.total_count ? Number(resultado.rows[0].total_count) : 0;
+    const estudiantes = resultado.rows.map(({ total_count, ...resto }) => resto);
+    return { estudiantes, total };
 }
 
-export async function obtenerTodas() {
+export async function obtenerTodas({ search = '', limit = 10, offset = 0 } = {}) {
     const resultado = await pool.query(
-        `SELECT sp.*, p.first_name, p.last_name, p.email,
-        g.grade, s.status
+        `SELECT sp.*, p.first_name, p.last_name, p.email, p.document_number,
+        g.grade, s.status,
+        COUNT(*) OVER() AS total_count
         FROM student_profiles sp
         JOIN people p ON p.id = sp.people_id
         JOIN grades g ON g.id = sp.grade_id
         JOIN statuses s ON s.id = sp.status_id
-        ORDER BY p.last_name, p.first_name`
+        WHERE ($1 = '' OR p.first_name ILIKE '%' || $1 || '%'
+        OR p.last_name ILIKE '%' || $1 || '%'
+        OR p.document_number ILIKE '%' || $1 || '%')
+        ORDER BY p.last_name, p.first_name
+        LIMIT $2 OFFSET $3`,
+        [search, limit, offset]
     );
-    return resultado.rows;
+    const total = resultado.rows[0]?.total_count ? Number(resultado.rows[0].total_count) : 0;
+    const estudiantes = resultado.rows.map(({ total_count, ...resto }) => resto);
+    return { estudiantes, total };
 }
 
 export async function obtenerPorId(id, institution_id) {

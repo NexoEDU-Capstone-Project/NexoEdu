@@ -2,18 +2,29 @@ import * as StudentModel from '../models/studentModel.js'
 
 export async function listar(req, res) {
     try {
+        const page = Math.max(parseInt(req.query.page) || 1, 1);
+        const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
+        const offset = (page - 1) * limit;
+        const search = (req.query.search || '').trim();
+
+        let resultado;
         if (req.user.rol === 'superadmin') {
-            const estudiantes = await StudentModel.obtenerTodas()
-            return res.json(estudiantes)
+            resultado = await StudentModel.obtenerTodas({ search, limit, offset });
+        } else {
+            const institutionId = req.user.institution_id;
+            if (!institutionId) return res.status(403).json({ error: 'Este admin no tiene una institución asignada' });
+            resultado = await StudentModel.obtenerPorInstitucion(institutionId, { search, limit, offset });
         }
-        const institutionId = req.user.institution_id;
-        if (!institutionId) {
-            return res.status(403).json({ error: 'Este admin no tiene una institución asignada' });
-        }
-        const estudiantes = await StudentModel.obtenerPorInstitucion(institutionId)
-        res.json(estudiantes)
+
+        res.json({
+            data: resultado.estudiantes,
+            pagination: {
+                page, limit, total: resultado.total,
+                totalPages: Math.ceil(resultado.total / limit) || 1
+            }
+        });
     } catch (error) {
-        res.status(500).json({ error: 'Error al obtener los estudiantes' })
+        res.status(500).json({ error: 'Error al obtener los estudiantes' });
     }
 }
 
