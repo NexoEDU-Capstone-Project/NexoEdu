@@ -23,5 +23,8 @@
   "homepage": "https://github.com/Proyecto-Integrador-Riwi/Riwi-Projects#readme",
   "devDependencies": {
     "concurrently": "^10.0.3"
+  },
+  "overrides": {
+    "shell-quote": "^1.10.0"
   }
 }
