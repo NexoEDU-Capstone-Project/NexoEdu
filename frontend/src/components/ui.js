@@ -41,7 +41,7 @@ export function statCard({ label, valor, iconName, nota = '', notaColor = 'text-
     return `
         <div class="card relative overflow-hidden">
             <span class="absolute right-4 top-4 text-navy-100">${icon(iconName, 'w-12 h-12')}</span>
-            <p class="text-sm font-medium text-ink-soft">${label}</p>
+            <p class="caracter text-ink-soft">${label}</p>
             <p class="mt-1 font-display text-4xl font-bold text-navy-600">${valor}</p>
             ${nota ? `<p class="mt-2 flex items-center gap-1 text-sm font-medium ${notaColor}">${nota}</p>` : ''}
         </div>`;

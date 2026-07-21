@@ -87,6 +87,14 @@
   * {
     scrollbar-color: var(--color-navy-200) transparent;
   }
+
+  .caracter {
+    font-family: var(--font-display);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-navy-400);
+    letter-spacing: -0.01em;
+  }
 }
 
 /* ============================================================

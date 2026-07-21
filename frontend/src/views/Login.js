@@ -16,7 +16,7 @@ const Login = {
 
                 <!-- Panel visual (foto de niños estudiando + degradado, texto arriba) -->
                 <aside class="relative hidden lg:block bg-navy-600"
-                    style="background-image:linear-gradient(180deg, rgba(20,35,52,.90) 0%, rgba(20,35,52,.35) 48%, rgba(20,35,52,.25) 100%), url('/brand/ninos-estudiando.jpg'); background-size:cover; background-position:center;">
+                    style="background-image:linear-gradient(180deg, rgba(20,35,52,.90) 0%, rgba(20,35,52,.35) 48%, rgba(20,35,52,.25) 100%), url('/brand/Niños_estudiando2.jpg'); background-size:cover; background-position:center;">
                     <div class="relative flex h-full flex-col justify-start p-12 text-white">
                         <div class="mb-5 flex h-1.5 w-24 overflow-hidden rounded-full" aria-hidden="true">
                             <span class="flex-1 bg-red-500"></span>
@@ -42,7 +42,7 @@ const Login = {
                         </div>
 
                         <div class="mb-7 text-center">
-                            <h2 class="font-display text-2xl font-bold text-navy-600">Bienvenido de nuevo</h2>
+                            <h2 class="font-display text-2xl md:text-3xl font-bold text-navy-600">Bienvenido de nuevo</h2>
                             <p class="mt-1.5 text-sm text-ink-soft">Inicia sesión para continuar con tu formación académica.</p>
                         </div>
 

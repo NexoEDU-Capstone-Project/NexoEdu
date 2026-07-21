@@ -17,6 +17,8 @@ const DashboardEscuela = {
         contenido.innerHTML = `
             <!-- Hero (banner + logo de la institución) -->
             <div id="hero" class="mb-8"></div>
+            <!-- Tarjetas de info de la institución -->
+            <div id="institution-info" class="mb-8"></div>
 
             <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
@@ -74,10 +76,10 @@ const DashboardEscuela = {
         const institutionId = Auth.getUser()?.institution_id;
         if (institutionId) {
             InstitutionService.obtener(institutionId)
-                .then((inst) => this._pintarHero(hero, inst))
-                .catch(() => this._pintarHero(hero, null));
+                .then((inst) => this._pintarHero(hero, inst, contenido))
+                .catch(() => this._pintarHero(hero, null, contenido));
         } else {
-            this._pintarHero(hero, null);
+            this._pintarHero(hero, null, contenido);
         }
 
         try {
@@ -129,19 +131,20 @@ const DashboardEscuela = {
 
     // Hero tipo "portada de institución": banner (con fallback a degradado navy),
     // logo, nombre y tricolor de Barranquilla.
-    _pintarHero(hero, inst) {
+    _pintarHero(hero, inst, contenido) {
         const nombre = inst?.institution_name || 'Panel de tu institución';
         const bannerStyle = inst?.banner_url
-            ? `background-image:linear-gradient(180deg, rgba(20,35,52,.45), rgba(20,35,52,.88)), url('${inst.banner_url}'); background-size:cover; background-position:center;`
+            ? `background-image:linear-gradient(180deg, rgba(20,35,52, 0.25), rgba(20,35,52,.75)), url('${inst.banner_url}'); background-size:cover; background-position:center;`
             : '';
 
+        // Pintar solo el banner en el hero
         hero.innerHTML = `
             <section class="relative overflow-hidden rounded-2xl bg-navy-600 text-white" style="${bannerStyle}">
                 ${inst?.banner_url ? '' : `
                     <span class="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-green-500/25 blur-2xl"></span>
                     <span class="pointer-events-none absolute bottom-0 right-24 h-40 w-40 rounded-full bg-yellow-400/10 blur-2xl"></span>`}
-                <div class="relative flex h-44 flex-col justify-end p-6 sm:h-52 sm:p-8">
-                    <span class="mb-4 flex h-1.5 w-20 overflow-hidden rounded-full" aria-hidden="true">
+                <div class="relative flex h-44 flex-col justify-end p-6 sm:h-52 sm:p-8 md:h-96">
+                    <span class="mb-4 flex h-1.5 w-40 overflow-hidden rounded-full" aria-hidden="true">
                         <span class="flex-1 bg-red-500"></span><span class="flex-1 bg-yellow-400"></span><span class="flex-1 bg-green-500"></span>
                     </span>
                     <div class="flex items-end gap-4">
@@ -156,22 +159,31 @@ const DashboardEscuela = {
                         </div>
                     </div>
                 </div>
-            </section>
-            ${inst ? `
-            <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div class="card flex items-start gap-3 p-4">
-                    <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-navy-50 text-navy-500">${icon('user', 'w-4 h-4')}</span>
-                    <div class="min-w-0"><p class="text-xs text-ink-muted">Director</p><p class="truncate font-medium text-navy-600" title="${inst.director || ''}">${inst.director || 'Sin asignar'}</p></div>
-                </div>
-                <div class="card flex items-start gap-3 p-4">
-                    <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-navy-50 text-navy-500">${icon('idCard', 'w-4 h-4')}</span>
-                    <div class="min-w-0"><p class="text-xs text-ink-muted">Código DANE</p><p class="truncate font-medium text-navy-600">${inst.dane_code || '—'}</p></div>
-                </div>
-                <div class="card flex items-start gap-3 p-4">
-                    <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-navy-50 text-navy-500">${icon('mapPin', 'w-4 h-4')}</span>
-                    <div class="min-w-0"><p class="text-xs text-ink-muted">Dirección</p><p class="truncate font-medium text-navy-600" title="${inst.address || ''}">${inst.address || '—'}</p></div>
-                </div>
-            </div>` : ''}`;
+            </section>`;
+        
+        // Pintar las tarjetas de info en el contenedor separado
+        const infoContainer = contenido.querySelector('#institution-info');
+        if (infoContainer) {
+            if (inst) {
+                infoContainer.innerHTML = `
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        <div class="card flex items-start gap-3 p-4">
+                            <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-navy-50 text-navy-500">${icon('user', 'w-4 h-4')}</span>
+                            <div class="min-w-0"><p class="caracter">Director</p><p class="truncate font-medium text-navy-600" title="${inst.director || ''}">${inst.director || 'Sin asignar'}</p></div>
+                        </div>
+                        <div class="card flex items-start gap-3 p-4">
+                            <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-navy-50 text-navy-500">${icon('idCard', 'w-4 h-4')}</span>
+                            <div class="min-w-0"><p class="caracter">Código DANE</p><p class="truncate font-medium text-navy-500">${inst.dane_code || '—'}</p></div>
+                        </div>
+                        <div class="card flex items-start gap-3 p-4">
+                            <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-navy-50 text-navy-500">${icon('mapPin', 'w-4 h-4')}</span>
+                            <div class="min-w-0"><p class="caracter">Dirección</p><p class="truncate font-medium text-navy-500" title="${inst.address || ''}">${inst.address || '—'}</p></div>
+                        </div>
+                    </div>`;
+            } else {
+                infoContainer.innerHTML = '';
+            }
+        }
     },
 
     // Para cada campaña en curso (hasta 4) consulta sus métricas y pinta una

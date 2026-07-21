@@ -68,6 +68,13 @@ export function renderLayout(contenidoElement, { crumbs } = {}) {
 
     const main = document.createElement('main');
     main.className = 'flex-1 px-5 py-6 sm:px-8 sm:py-8';
+    
+    // Extraer hero si existe (para que ocupe todo el ancho)
+    const hero = contenidoElement.querySelector('#hero');
+    if (hero) {
+        main.appendChild(hero);
+    }
+    
     const inner = document.createElement('div');
     inner.className = 'mx-auto w-full max-w-6xl';
     inner.appendChild(contenidoElement);
