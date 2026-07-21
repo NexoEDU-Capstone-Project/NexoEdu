@@ -12,7 +12,7 @@ const options = {
         },
         servers: [
             { url: `http://localhost:${PORT}`, description: 'Desarrollo local' },
-            { url: 'https://nexoedu-backend.onrender.com/api', description: 'Producción (Render)' },
+            { url: 'https://nexoedu-backend.onrender.com', description: 'Producción (Render)' },
         ],
         components: {
             securitySchemes: {
