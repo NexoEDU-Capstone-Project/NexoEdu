@@ -1,1 +1,158 @@
 @import "tailwindcss";
+
+/* ============================================================
+   SISTEMA DE DISEÑO — Seguimiento Estudiantil (Alcaldía de Barranquilla)
+   Tono: institucional + vibrante/juvenil.
+   Marca:
+     Azul oscuro #142334 (primario)   Verde #279B48 (acento)
+     Amarillo   #FFEA00 (acento)      Blanco #F8F9FA (secundario/superficie)
+   Los tokens de @theme se exponen como utilidades Tailwind:
+     bg-navy-500, text-green-600, ring-yellow-400, font-display, etc.
+   ============================================================ */
+@theme {
+  /* --- Azul oscuro (primario) --- escala derivada de #142334 --- */
+  --color-navy-50:  #eef1f5;
+  --color-navy-100: #d3dae4;
+  --color-navy-200: #a7b4c8;
+  --color-navy-300: #6f83a1;
+  --color-navy-400: #3f5876;
+  --color-navy-500: #23384f;
+  --color-navy-600: #142334; /* marca */
+  --color-navy-700: #101c29;
+  --color-navy-800: #0b141d;
+  --color-navy-900: #070d13;
+
+  /* --- Verde (acento principal) --- escala derivada de #279B48 --- */
+  --color-green-50:  #e9f7ee;
+  --color-green-100: #c6ebd1;
+  --color-green-200: #93dcaa;
+  --color-green-300: #5cc87f;
+  --color-green-400: #34b062;
+  --color-green-500: #279b48; /* marca */
+  --color-green-600: #1f7d3a;
+  --color-green-700: #19632f;
+  --color-green-800: #144d25;
+  --color-green-900: #0d331a;
+
+  /* --- Amarillo (acento vibrante) --- escala derivada de #FFEA00 --- */
+  --color-yellow-50:  #fffdea;
+  --color-yellow-100: #fff9c2;
+  --color-yellow-200: #fff389;
+  --color-yellow-300: #ffee4d;
+  --color-yellow-400: #ffea00; /* marca */
+  --color-yellow-500: #e6c900;
+  --color-yellow-600: #b89e00;
+  --color-yellow-700: #8a7600;
+  --color-yellow-800: #5c4f00;
+  --color-yellow-900: #2e2700;
+
+  /* --- Neutros / superficie --- */
+  --color-surface:      #f8f9fa; /* fondo base (blanco roto de marca) */
+  --color-surface-soft: #eef1f5;
+  --color-ink:          #142334; /* texto principal = navy de marca */
+  --color-ink-soft:     #4b5a6e;
+  --color-ink-muted:    #8695a8;
+
+  /* --- Tipografía --- */
+  --font-display: "Fredoka", "Inter", system-ui, sans-serif; /* títulos/resaltados */
+  --font-sans:    "Inter", Arial, system-ui, sans-serif;      /* UI general */
+  --font-body:    Arial, "Inter", system-ui, sans-serif;      /* texto largo */
+
+  /* --- Radios y sombras (look juvenil = esquinas generosas) --- */
+  --radius-xl:  1rem;
+  --radius-2xl: 1.5rem;
+
+  --shadow-card: 0 1px 2px rgb(20 35 52 / 0.06), 0 8px 24px -12px rgb(20 35 52 / 0.18);
+  --shadow-pop:  0 12px 32px -8px rgb(20 35 52 / 0.28);
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    font-family: var(--font-body);
+    color: var(--color-ink);
+    background-color: var(--color-surface);
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  /* Scrollbar sutil acorde a la marca */
+  * {
+    scrollbar-color: var(--color-navy-200) transparent;
+  }
+}
+
+/* ============================================================
+   COMPONENTES REUTILIZABLES
+   Clases utilitarias de alto nivel para mantener consistencia
+   entre todas las vistas. Uso: <button class="btn btn-primary">
+   ============================================================ */
+@layer components {
+  /* --- Botones --- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5
+           text-sm font-semibold transition-all duration-150
+           focus:outline-none focus-visible:ring-4 disabled:opacity-50 disabled:pointer-events-none
+           active:scale-[0.98] cursor-pointer;
+    font-family: var(--font-sans);
+  }
+  .btn-primary {
+    @apply bg-navy-600 text-white hover:bg-navy-500 focus-visible:ring-navy-200 shadow-sm;
+  }
+  .btn-accent {
+    @apply bg-green-500 text-white hover:bg-green-600 focus-visible:ring-green-200 shadow-sm;
+  }
+  .btn-yellow {
+    @apply bg-yellow-400 text-navy-700 hover:bg-yellow-300 focus-visible:ring-yellow-200 shadow-sm;
+  }
+  .btn-ghost {
+    @apply bg-transparent text-navy-600 hover:bg-navy-50 focus-visible:ring-navy-100;
+  }
+  .btn-outline {
+    @apply border border-navy-200 bg-white text-navy-600 hover:bg-navy-50 focus-visible:ring-navy-100;
+  }
+  .btn-danger {
+    @apply bg-red-500 text-white hover:bg-red-600 focus-visible:ring-red-200 shadow-sm;
+  }
+
+  /* --- Tarjetas --- */
+  .card {
+    @apply bg-white rounded-2xl p-6;
+    box-shadow: var(--shadow-card);
+  }
+
+  /* --- Campos de formulario --- */
+  .label {
+    @apply block text-sm font-medium text-navy-600 mb-1.5;
+  }
+  .input,
+  .select,
+  .textarea {
+    @apply w-full rounded-xl border border-navy-200 bg-white px-3.5 py-2.5 text-sm text-navy-700
+           focus:outline-none focus:border-green-400 focus:ring-4 focus:ring-green-100
+           transition-colors;
+    font-family: var(--font-sans);
+  }
+
+  /* --- Badges / etiquetas de estado --- */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+  .badge-green  { @apply bg-green-100 text-green-700; }
+  .badge-yellow { @apply bg-yellow-100 text-yellow-700; }
+  .badge-navy   { @apply bg-navy-100 text-navy-700; }
+  .badge-red    { @apply bg-red-100 text-red-600; }
+
+  /* --- Título de sección --- */
+  .h-page {
+    @apply text-2xl font-bold text-navy-600;
+    font-family: var(--font-display);
+  }
+}

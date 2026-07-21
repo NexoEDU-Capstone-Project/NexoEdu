@@ -1,59 +1,85 @@
-export const API_URL = "http://localhost:3000"
+import * as AuthService from '../services/authService.js';
+import http, { ApiError } from './http.js';
+
+// Nota sobre el modelo de sesión:
+// - El accessToken real que autentica cada petición viaja en una cookie
+//   httpOnly ("accessToken"), puesta por el backend en /auth/login. El
+//   navegador la reenvía solo (gracias a credentials: 'include' en http.js);
+//   JS nunca la lee ni la toca directamente.
+// - El refreshToken SÍ hay que guardarlo nosotros (el backend lo devuelve
+//   en el body, no como cookie), para poder pedir un accessToken nuevo
+//   cuando el actual expire, sin forzar un login manual.
+// - "user" (username, rol, institution_id) se guarda para uso inmediato de
+//   la UI (mostrar nombre, decidir qué menú renderizar) sin tener que
+//   decodificar el JWT en el cliente.
+
+const REFRESH_TOKEN_KEY = 'refreshToken';
+const USER_KEY = 'user';
+
+const listeners = [];
 
 const Auth = {
-    _currentUser: null,
-    _listeners: [],
-
-    // Inicializamos obteniendo el localStorage
-    init() {
-        const stored = localStorage.getItem("currentUser");
-        this._currentUser = stored ? JSON.parse(stored) : null // aqui verificamos que si el usuario ha sido logueado pues lo scanea y sino pues manda un null
-    },
-
     getUser() {
-        return this._currentUser; // retornamos currentUser porque es la variable que contiene el usuario actalizado obtenido por el getItem
+        const raw = localStorage.getItem(USER_KEY);
+        return raw ? JSON.parse(raw) : null;
     },
 
     isAuthenticated() {
-        return this._currentUser !== null // verifica si hay usauario actualizado. osea si no esta nulo, entonces si hay un usuario actualizado pues retorna true 
+        return this.getUser() !== null;
     },
 
-    isAdmin() {
-        return this._currentUser?.role === "admin"
+    hasRole(...roles) {
+        const user = this.getUser();
+        return user ? roles.includes(user.rol) : false;
     },
 
-    isUser() {
-        return this._currentUser?.role === "user"
+    async login(username, password) {
+        const data = await AuthService.login(username, password);
+        localStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken);
+        localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+        this._notify();
+        return data.user;
     },
 
-    async Login(email, password) {
-        const res = await fetch(`${API_URL}/users?email=${email}`);
-        const users = await res.json()
-
-        if (users.length === 0 || users[0].password !== password) {
-            throw new Error("Credenciales incorrectas")
+    async logout() {
+        try {
+            await AuthService.logout();
+        } catch (error) {
+            // Si el backend no responde, igual limpiamos la sesión local:
+            // el usuario quiere salir, no tiene sentido dejarlo atrapado.
+            console.error('Error al cerrar sesión en el servidor:', error);
         }
-
-        const user = users[0] //obtiene el primer usuario encontrado
-        localStorage.setItem("currentUser", JSON.stringify(user))
-        this._currentUser = user
-        this._notify()
-        return user
+        localStorage.removeItem(REFRESH_TOKEN_KEY);
+        localStorage.removeItem(USER_KEY);
+        this._notify();
     },
 
-    logout() {
-        localStorage.removeItem("currentUser") //para la salida de sesion y elimina el elemento guardado
-        this._currentUser = null
-        this._notify()
+    // Intenta renovar el accessToken usando el refreshToken guardado.
+    // Devuelve true si lo logró, false si el refresh también falló
+    // (en cuyo caso hay que forzar login de nuevo).
+    async tryRefresh() {
+        const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+        if (!refreshToken) return false;
+
+        try {
+            await AuthService.refresh(refreshToken);
+            return true;
+        } catch (error) {
+            localStorage.removeItem(REFRESH_TOKEN_KEY);
+            localStorage.removeItem(USER_KEY);
+            this._notify();
+            return false;
+        }
     },
 
     onChange(callback) {
-        this._listeners.push(callback)
+        listeners.push(callback);
     },
 
     _notify() {
-        this._listeners.forEach(cb => cb(this._currentUser))
+        listeners.forEach((cb) => cb());
     }
-}
+};
 
 export default Auth;
+export { ApiError };
