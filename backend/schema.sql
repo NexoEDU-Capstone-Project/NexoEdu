@@ -47,7 +47,7 @@ CREATE TABLE public.campaign_enrollments (
     id integer NOT NULL,
     campaign_id integer NOT NULL,
     student_profile_id integer NOT NULL,
-    enrolled_at timestamp without time zone NOT NULL
+    enrolled_at timestamp with time zone NOT NULL
 );
 
 CREATE TABLE public.campaign_scope (
@@ -164,7 +164,7 @@ CREATE TABLE public.updates (
     id integer NOT NULL,
     people_id integer NOT NULL,
     campaign_id integer NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp with time zone NOT NULL
 );
 
 CREATE TABLE public.user_roles (

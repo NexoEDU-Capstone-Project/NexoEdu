@@ -6,7 +6,7 @@ import { crearEditorCriteria } from '../components/EditorCriteria.js';
 import { ApiError } from '../modules/http.js';
 import Auth from '../modules/auth.js';
 import { icon } from '../components/icons.js';
-import { encabezado, campaignCard, vacio, modalOverlay, modalHeader, progressBar, estadoCampania, formatearFecha, avatar, iniciales, skeletonCards } from '../components/ui.js';
+import { encabezado, campaignCard, vacio, modalOverlay, modalHeader, progressBar, estadoCampania, formatearFecha, formatearFechaCol, avatar, iniciales, skeletonCards } from '../components/ui.js';
 import { toast } from '../components/toast.js';
 import { confirmDialog } from '../components/confirm.js';
 
@@ -234,7 +234,7 @@ const GestionCampanias = {
                             <p class="truncate text-xs text-ink-muted">${gradoNombre(u.grade_id)}</p>
                         </div>
                     </div>
-                    <span class="shrink-0 text-xs text-ink-muted">${formatearFecha(u.updated_at)}</span>
+                    <span class="shrink-0 text-xs text-ink-muted">${formatearFechaCol(u.updated_at)}</span>
                 </div>`).join('') + `</div>`;
         }
     },
@@ -390,7 +390,7 @@ const GestionCampanias = {
                                 <input type="date" name="start_date" required class="input">
                             </div>
                             <div>
-                                <label class="label">Fecha de fin (opcional)</label>
+                                <label class="label">Fecha de fin</label>
                                 <input type="date" name="end_date" class="input">
                             </div>
                         </div>

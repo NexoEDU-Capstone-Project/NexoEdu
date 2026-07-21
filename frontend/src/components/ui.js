@@ -10,6 +10,18 @@ export function formatearFecha(iso) {
     return d.toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+// Igual que formatearFecha, pero para INSTANTES reales (p. ej. updated_at):
+// fija la zona horaria de Colombia para que la fecha no se corra por diferencia
+// horaria (una actualización nocturna no debe saltar al día siguiente).
+// Ojo: NO usar para fechas de calendario (birth_date, start_date), porque esas
+// no llevan hora y forzar zona las correría un día.
+export function formatearFechaCol(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'America/Bogota' });
+}
+
 // Iniciales a partir de nombre y apellido (o de un string).
 export function iniciales(nombre = '', apellido = '') {
     const a = (nombre || '').trim().charAt(0);
@@ -105,9 +117,9 @@ export function semaforoActualizacion(iso) {
         return { clase: 'badge-red', dot: 'bg-red-500', label: 'Sin actualizar', fecha: 'Nunca', dias: null };
     }
     const dias = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-    if (dias <= 90) return { clase: 'badge-green', dot: 'bg-green-500', label: 'Al día', fecha: formatearFecha(iso), dias };
-    if (dias <= 180) return { clase: 'badge-yellow', dot: 'bg-yellow-400', label: 'Por vencer', fecha: formatearFecha(iso), dias };
-    return { clase: 'badge-red', dot: 'bg-red-500', label: 'Desactualizado', fecha: formatearFecha(iso), dias };
+    if (dias <= 90) return { clase: 'badge-green', dot: 'bg-green-500', label: 'Al día', fecha: formatearFechaCol(iso), dias };
+    if (dias <= 180) return { clase: 'badge-yellow', dot: 'bg-yellow-400', label: 'Por vencer', fecha: formatearFechaCol(iso), dias };
+    return { clase: 'badge-red', dot: 'bg-red-500', label: 'Desactualizado', fecha: formatearFechaCol(iso), dias };
 }
 
 // Pastilla visual del semáforo (punto de color + fecha).
