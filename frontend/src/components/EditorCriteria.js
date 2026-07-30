@@ -18,7 +18,7 @@ export function crearEditorCriteria({ catalogos }) {
     function filaHtml(indice) {
         const { generos, grados, estados } = catalogos;
         return `
-            <div class="criteria-fila relative mb-2 grid grid-cols-2 gap-3 rounded-xl border border-navy-100 bg-navy-50/40 p-4" data-fila="${indice}">
+            <div class="criteria-fila relative mb-2 grid grid-cols-1 gap-3 rounded-xl border border-navy-100 bg-navy-50/40 p-4 sm:grid-cols-2" data-fila="${indice}">
                 <button type="button" class="btn-quitar-criteria absolute right-2 top-2 text-xs font-semibold text-red-500 hover:text-red-600">Quitar</button>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-ink-soft">Género (opcional)</label>

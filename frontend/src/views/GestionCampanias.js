@@ -6,7 +6,7 @@ import { crearEditorCriteria } from '../components/EditorCriteria.js';
 import { ApiError } from '../modules/http.js';
 import Auth from '../modules/auth.js';
 import { icon } from '../components/icons.js';
-import { encabezado, campaignCard, vacio, modalOverlay, modalHeader, progressBar, estadoCampania, formatearFecha, formatearFechaCol, avatar, iniciales, skeletonCards } from '../components/ui.js';
+import { encabezado, campaignCard, vacio, modalOverlay, modalHeader, progressBar, estadoCampania, formatearFecha, formatearFechaCol, avatar, iniciales, skeletonCards, abreviarInstitucion } from '../components/ui.js';
 import { toast } from '../components/toast.js';
 import { confirmDialog } from '../components/confirm.js';
 
@@ -296,7 +296,7 @@ const GestionCampanias = {
                 } else if (selectTipo.value === 'INSTITUTION') {
                     valorContainer.innerHTML = `
                         <select name="scope-institution-${indice}" class="select">
-                            ${instituciones.map((i) => `<option value="${i.id}">${i.institution_name}</option>`).join('')}
+                            ${instituciones.map((i) => `<option value="${i.id}" title="${i.institution_name}">${abreviarInstitucion(i.institution_name)}</option>`).join('')}
                         </select>`;
                 } else if (selectTipo.value === 'LOCALITY') {
                     valorContainer.innerHTML = `
@@ -384,7 +384,7 @@ const GestionCampanias = {
                             <label class="label">Descripción</label>
                             <textarea name="description" rows="2" class="textarea"></textarea>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
                                 <label class="label">Fecha de inicio</label>
                                 <input type="date" name="start_date" required class="input">

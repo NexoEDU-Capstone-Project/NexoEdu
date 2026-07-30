@@ -5,7 +5,7 @@ import { crearSelectorBarrio } from '../components/SelectorBarrio.js';
 import { ApiError } from '../modules/http.js';
 import Router from '../modules/router.js';
 import { icon } from '../components/icons.js';
-import { encabezado, modalOverlay, modalHeader, vacio, paginacion, skeletonCards } from '../components/ui.js';
+import { encabezado, modalOverlay, modalHeader, vacio, paginacion, skeletonCards, abreviarInstitucion } from '../components/ui.js';
 import { toast } from '../components/toast.js';
 
 // Gestión de instituciones (superadmin): grid de tarjetas con búsqueda,
@@ -19,11 +19,11 @@ const GestionInstituciones = {
                 titulo: 'Gestión de Instituciones',
                 subtitulo: 'Supervisa y gestiona los centros educativos registrados en el distrito.',
                 acciones: `
-                    <div class="relative">
+                    <div class="relative w-full sm:w-auto">
                         <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-navy-300">${icon('search', 'w-4 h-4')}</span>
-                        <input id="buscar" class="input w-56 pl-9" placeholder="Buscar institución...">
+                        <input id="buscar" class="input w-full pl-9 sm:w-56" placeholder="Buscar institución...">
                     </div>
-                    <select id="filtro-estado" class="select w-44">
+                    <select id="filtro-estado" class="select w-full sm:w-44">
                         <option value="">Todas</option>
                         <option value="activo">Con director</option>
                         <option value="sin">Sin director</option>
@@ -124,7 +124,7 @@ const GestionInstituciones = {
                     </span>
                     ${badge}
                 </div>
-                <h3 class="font-display text-lg font-semibold leading-snug text-navy-600">${i.institution_name}</h3>
+                <h3 class="font-display text-lg font-semibold leading-snug text-navy-600" title="${i.institution_name}">${abreviarInstitucion(i.institution_name)}</h3>
                 <p class="mt-1 flex items-center gap-1 text-xs text-ink-muted">${icon('idCard', 'w-4 h-4')} DANE: ${i.dane_code ?? '—'}</p>
 
                 <div class="my-4 border-t border-navy-50"></div>

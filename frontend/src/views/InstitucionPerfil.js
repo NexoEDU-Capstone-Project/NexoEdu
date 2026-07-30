@@ -6,7 +6,7 @@ import { crearSelectorBarrio } from '../components/SelectorBarrio.js';
 import { ApiError } from '../modules/http.js';
 import Router from '../modules/router.js';
 import { icon } from '../components/icons.js';
-import { vacio, iniciales, avatar, semaforoPill, modalOverlay, modalHeader } from '../components/ui.js';
+import { vacio, iniciales, avatar, semaforoPill, modalOverlay, modalHeader, abreviarInstitucion } from '../components/ui.js';
 import { toast } from '../components/toast.js';
 import { confirmDialog } from '../components/confirm.js';
 
@@ -51,7 +51,7 @@ const InstitucionPerfil = {
                                     : `<div class="flex h-full w-full items-center justify-center bg-navy-50 text-navy-400">${icon('school', 'w-8 h-8')}</div>`}
                             </div>
                             <div class="min-w-0 pb-1 text-white">
-                                <h1 class="font-display text-2xl font-bold leading-tight drop-shadow sm:text-3xl">${inst.institution_name}</h1>
+                                <h1 class="font-display text-2xl font-bold leading-tight drop-shadow sm:text-3xl" title="${inst.institution_name}">${abreviarInstitucion(inst.institution_name)}</h1>
                                 <p class="flex items-center gap-1.5 text-sm text-navy-100">${icon('idCard', 'w-4 h-4')} DANE: ${inst.dane_code ?? '—'}</p>
                             </div>
                         </div>
@@ -93,7 +93,7 @@ const InstitucionPerfil = {
             return renderLayout(contenido, {
                 crumbs: [
                     { label: 'Instituciones', href: '/gestion-instituciones' },
-                    { label: inst.institution_name }
+                    { label: abreviarInstitucion(inst.institution_name) }
                 ]
             });
         } catch (error) {
@@ -128,7 +128,8 @@ const InstitucionPerfil = {
 
         cont.innerHTML = `
             <div class="card p-0 overflow-hidden">
-                <table class="w-full text-left">
+              <div class="overflow-x-auto">
+                <table class="w-full min-w-md text-left">
                     <thead>
                         <tr class="text-xs uppercase tracking-wide text-ink-muted">
                             <th class="px-5 py-3 font-semibold">Estudiante</th>
@@ -137,6 +138,7 @@ const InstitucionPerfil = {
                     </thead>
                     <tbody>${filas}</tbody>
                 </table>
+              </div>
             </div>`;
     },
 

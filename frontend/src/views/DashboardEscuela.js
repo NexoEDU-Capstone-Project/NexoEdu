@@ -6,7 +6,7 @@ import * as InstitutionService from '../services/institutionService.js';
 import Auth from '../modules/auth.js';
 import { ApiError } from '../modules/http.js';
 import { icon } from '../components/icons.js';
-import { statCard, estadoCampania, formatearFecha, iniciales, avatar, vacio, campaignCard, progressBar, skeletonCards, skeletonTabla } from '../components/ui.js';
+import { statCard, estadoCampania, iniciales, avatar, vacio, campaignCard, progressBar, skeletonCards, skeletonTabla, abreviarInstitucion, semaforoPill } from '../components/ui.js';
 
 // Dashboard del administrador/director: portada de la institución (banner +
 // logo + datos), estadísticas, progreso de actualización de sus campañas,
@@ -54,6 +54,14 @@ const DashboardEscuela = {
             <div id="tabla" class="card p-0 overflow-hidden"></div>
         `;
 
+        // OJO: renderLayout() MUEVE el #hero fuera de `contenido` (con
+        // appendChild, para que ocupe todo el ancho de la página). Por eso
+        // guardamos aquí la referencia al nodo: sigue siendo válida aunque deje
+        // de ser descendiente de `contenido`. Buscarlo con
+        // contenido.querySelector('#hero') dentro de _cargar() devolvía null al
+        // refrescar (el botón "Actualizar" rompía con un TypeError).
+        this._hero = contenido.querySelector('#hero');
+
         this._cargar(contenido);
 
         contenido.querySelector('#btn-refrescar').addEventListener('click', () => this._cargar(contenido));
@@ -71,8 +79,9 @@ const DashboardEscuela = {
         tabla.innerHTML = skeletonTabla(6);
 
         // Hero con banner + logo reales de la institución del director.
-        const hero = contenido.querySelector('#hero');
-        hero.innerHTML = '<div class="h-44 animate-pulse rounded-2xl bg-navy-50/60 sm:h-52"></div>';
+        // Se usa la referencia guardada en render() (ver nota allí).
+        const hero = this._hero;
+        if (hero) hero.innerHTML = '<div class="h-44 animate-pulse rounded-2xl bg-navy-50/60 sm:h-52"></div>';
         const institutionId = Auth.getUser()?.institution_id;
         if (institutionId) {
             InstitutionService.obtener(institutionId)
@@ -83,10 +92,11 @@ const DashboardEscuela = {
         }
 
         try {
-            const [estudiantes, campanias, estados] = await Promise.all([
+            const [estudiantes, campanias, estados, grados] = await Promise.all([
                 StudentService.listar(),
                 CampaignService.listar().catch(() => []),
-                CatalogService.estados().catch(() => [])
+                CatalogService.estados().catch(() => []),
+                CatalogService.grados().catch(() => [])
             ]);
 
             const estadoPorId = Object.fromEntries(estados.map((e) => [e.id, e.status]));
@@ -95,13 +105,15 @@ const DashboardEscuela = {
             ).length;
             const activas = campanias.filter((c) => estadoCampania(c.start_date, c.end_date).texto === 'En curso').length;
 
+            // Contadores: todos con el mismo formato (número entero + nota que
+            // aporta contexto, sin repetir la misma cifra).
             stats.innerHTML = [
                 statCard({ label: 'Total estudiantes', valor: estudiantes.length, iconName: 'users',
-                    nota: `${icon('trendUp', 'w-4 h-4')} ${estudiantes.length} registrados` }),
-                statCard({ label: 'Campañas activas', valor: String(activas).padStart(2, '0'), iconName: 'megaphone',
+                    nota: `${icon('trendUp', 'w-4 h-4')} ${estudiantes.length - egresados} activos` }),
+                statCard({ label: 'Campañas activas', valor: activas, iconName: 'megaphone',
                     nota: `${icon('clock', 'w-4 h-4')} ${campanias.length} en total`, notaColor: 'text-yellow-600' }),
                 statCard({ label: 'Egresados', valor: egresados, iconName: 'gradCap',
-                    nota: `${icon('checkCircle', 'w-4 h-4')} del total registrado` })
+                    nota: `${icon('checkCircle', 'w-4 h-4')} ${estudiantes.length ? Math.round((egresados / estudiantes.length) * 100) : 0}% del total` })
             ].join('');
 
             // Campañas (hasta 3)
@@ -120,7 +132,7 @@ const DashboardEscuela = {
             if (estudiantes.length === 0) {
                 tabla.innerHTML = `<div class="p-6">${vacio('Aún no hay estudiantes registrados en tu institución.', 'users')}</div>`;
             } else {
-                tabla.innerHTML = this._tablaEstudiantes(estudiantes.slice(0, 6), estadoPorId);
+                tabla.innerHTML = this._tablaEstudiantes(estudiantes.slice(0, 8), estadoPorId, grados);
             }
         } catch (error) {
             const mensaje = error instanceof ApiError ? error.message : 'Error al cargar el dashboard';
@@ -132,7 +144,10 @@ const DashboardEscuela = {
     // Hero tipo "portada de institución": banner (con fallback a degradado navy),
     // logo, nombre y tricolor de Barranquilla.
     _pintarHero(hero, inst, contenido) {
-        const nombre = inst?.institution_name || 'Panel de tu institución';
+        if (!hero) return;
+        // Se abrevia "Institución Educativa Distrital" -> "I.E.D." para que el
+        // nombre no desborde el hero (sobre todo en móvil).
+        const nombre = abreviarInstitucion(inst?.institution_name) || 'Panel de tu institución';
         const bannerStyle = inst?.banner_url
             ? `background-image:linear-gradient(180deg, rgba(20,35,52, 0.25), rgba(20,35,52,.75)), url('${inst.banner_url}'); background-size:cover; background-position:center;`
             : '';
@@ -213,39 +228,74 @@ const DashboardEscuela = {
         }).join('');
     },
 
-    _tablaEstudiantes(estudiantes, estadoPorId) {
-        const filas = estudiantes.map((e) => {
-            const nombre = `${e.first_name} ${e.last_name}`;
+    // Resumen de estudiantes agrupado POR CURSO (mismo criterio que la vista de
+    // Gestión de estudiantes: orden según el catálogo de grados y "Egresados" al
+    // final). Sin columna de registro: para un resumen no aporta.
+    _tablaEstudiantes(estudiantes, estadoPorId, grados = []) {
+        const grupos = new Map();
+        for (const e of estudiantes) {
+            const key = e.grade_id ?? '__none__';
+            if (!grupos.has(key)) grupos.set(key, []);
+            grupos.get(key).push(e);
+        }
+
+        const ordenGrado = new Map(grados.map((g, i) => [g.id, i]));
+        const nombreGrado = new Map(grados.map((g) => [g.id, g.grade]));
+        const claves = [...grupos.keys()].sort((a, b) => {
+            if (a === '__none__') return 1;
+            if (b === '__none__') return -1;
+            return (ordenGrado.get(a) ?? 999) - (ordenGrado.get(b) ?? 999);
+        });
+
+        const fila = (e) => {
             const estado = estadoPorId[e.status_id] || '';
+            const nombre = `${e.first_name} ${e.last_name}`;
             return `
-                <tr class="border-t border-navy-50 hover:bg-navy-50/40 transition-colors">
+                <tr class="border-t border-navy-50 transition-colors hover:bg-navy-50/40">
                     <td class="px-5 py-3.5">
                         <div class="flex items-center gap-3">
                             ${avatar(iniciales(e.first_name, e.last_name), e.people_id)}
                             <div class="min-w-0">
-                                <p class="truncate font-medium text-navy-600">${nombre}</p>
-                                <p class="truncate text-xs text-ink-muted">${e.email}</p>
+                                <p class="truncate font-medium text-navy-600" title="${nombre}">${nombre}</p>
+                                <p class="truncate text-xs text-ink-muted" title="${e.email}">${e.email}</p>
                             </div>
                         </div>
                     </td>
-                    <td class="px-5 py-3.5 text-sm text-ink-soft">${e.document_number}</td>
+                    <td class="truncate px-5 py-3.5 text-sm text-ink-soft">${e.document_number}</td>
+                    <td class="px-5 py-3.5">${semaforoPill(e.ultima_actualizacion)}</td>
                     <td class="px-5 py-3.5"><span class="badge ${estado.toUpperCase() === 'EGRESADO' ? 'badge-navy' : 'badge-green'}">${estado || '—'}</span></td>
-                    <td class="px-5 py-3.5 text-sm text-ink-soft">${formatearFecha(e.start_date)}</td>
                 </tr>`;
-        }).join('');
+        };
 
-        return `
-            <table class="w-full text-left">
-                <thead>
-                    <tr class="text-xs uppercase tracking-wide text-ink-muted">
-                        <th class="px-5 py-3 font-semibold">Estudiante</th>
-                        <th class="px-5 py-3 font-semibold">Documento</th>
-                        <th class="px-5 py-3 font-semibold">Estado</th>
-                        <th class="px-5 py-3 font-semibold">Registro</th>
-                    </tr>
-                </thead>
-                <tbody>${filas}</tbody>
-            </table>`;
+        // Cada curso es su propia sección con encabezado y conteo.
+        return claves.map((key) => {
+            const titulo = key === '__none__' ? 'Egresados / sin curso' : (nombreGrado.get(key) ?? 'Sin curso');
+            const alumnos = grupos.get(key);
+            return `
+                <div class="border-b border-navy-50 last:border-b-0">
+                    <div class="flex items-center gap-2 bg-navy-50/50 px-5 py-2.5">
+                        ${icon('gradCap', 'w-4 h-4 text-green-500')}
+                        <span class="font-display text-sm font-semibold text-navy-600">${titulo}</span>
+                        <span class="badge badge-navy ml-auto">${alumnos.length}</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <!-- table-fixed + anchos por columna: sin esto cada grupo
+                             calcularía sus propios anchos y las columnas no
+                             quedarían alineadas entre un curso y otro. -->
+                        <table class="w-full min-w-xl table-fixed text-left">
+                            <thead>
+                                <tr class="text-xs uppercase tracking-wide text-ink-muted">
+                                    <th class="w-[40%] px-5 py-2.5 font-semibold">Estudiante</th>
+                                    <th class="w-[20%] px-5 py-2.5 font-semibold">Documento</th>
+                                    <th class="w-[22%] px-5 py-2.5 font-semibold">Última actualización</th>
+                                    <th class="w-[18%] px-5 py-2.5 font-semibold">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>${alumnos.map(fila).join('')}</tbody>
+                        </table>
+                    </div>
+                </div>`;
+        }).join('');
     },
 
     _skeletonStats() {

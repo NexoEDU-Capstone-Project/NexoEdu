@@ -163,18 +163,24 @@ const GestionEstudiantes = {
                         <span class="badge badge-navy">${alumnos.length}</span>
                     </div>
                     <div class="card p-0 overflow-hidden">
-                        <table class="w-full text-left">
+                      <div class="overflow-x-auto">
+                        <!-- table-fixed + anchos por columna: mantiene las columnas
+                             alineadas entre un curso y otro (cada grupo es su propia
+                             tabla) y hace que los nombres largos se trunquen en vez
+                             de ensanchar la columna. -->
+                        <table class="w-full min-w-2xl table-fixed text-left">
                             <thead>
                                 <tr class="text-xs uppercase tracking-wide text-ink-muted">
-                                    <th class="px-5 py-3 font-semibold">Estudiante</th>
-                                    <th class="px-5 py-3 font-semibold">Documento</th>
-                                    <th class="px-5 py-3 font-semibold">Última actualización</th>
-                                    <th class="px-5 py-3 font-semibold">Estado</th>
-                                    <th class="px-5 py-3 text-right font-semibold">Acciones</th>
+                                    <th class="w-[32%] px-5 py-3 font-semibold">Estudiante</th>
+                                    <th class="w-[16%] px-5 py-3 font-semibold">Documento</th>
+                                    <th class="w-[20%] px-5 py-3 font-semibold">Última actualización</th>
+                                    <th class="w-[14%] px-5 py-3 font-semibold">Estado</th>
+                                    <th class="w-[18%] px-5 py-3 text-right font-semibold">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>${alumnos.map((e) => this._fila(e)).join('')}</tbody>
                         </table>
+                      </div>
                     </div>
                 </div>`;
         }).join('');
@@ -194,13 +200,13 @@ const GestionEstudiantes = {
                 <td class="px-5 py-3.5">
                     <div class="flex items-center gap-3">
                         ${avatar(iniciales(e.first_name, e.last_name), e.people_id)}
-                        <div class="min-w-0 max-w-50 sm:max-w-60">
+                        <div class="min-w-0">
                             <p class="truncate font-medium text-navy-600" title="${e.first_name} ${e.last_name}">${e.first_name} ${e.last_name}</p>
                             <p class="truncate text-xs text-ink-muted" title="${e.email}">${e.email}</p>
                         </div>
                     </div>
                 </td>
-                <td class="px-5 py-3.5 text-sm text-ink-soft">${e.document_number}</td>
+                <td class="truncate px-5 py-3.5 text-sm text-ink-soft">${e.document_number}</td>
                 <td class="px-5 py-3.5">${semaforoPill(e.ultima_actualizacion)}</td>
                 <td class="px-5 py-3.5"><span class="badge ${estado.toUpperCase() === 'EGRESADO' ? 'badge-navy' : estado.toUpperCase() === 'ACTIVO' ? 'badge-green' : 'badge-yellow'}">${estado}</span></td>
                 <td class="px-5 py-3.5">
@@ -219,7 +225,7 @@ const GestionEstudiantes = {
     _camposPersonales(datos, selectorBarrio) {
         const { generos, tiposDocumento } = this._catalogos;
         return `
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label class="label">Nombres</label>
                     <input name="first_name" value="${datos?.first_name ?? ''}" required class="input">
@@ -229,7 +235,7 @@ const GestionEstudiantes = {
                     <input name="last_name" value="${datos?.last_name ?? ''}" required class="input">
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label class="label">Género</label>
                     <select name="gender_id" required class="input">
@@ -241,7 +247,7 @@ const GestionEstudiantes = {
                     <input type="date" name="birth_date" value="${datos?.birth_date ? datos.birth_date.substring(0, 10) : ''}" required class="input">
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label class="label">Email</label>
                     <input type="email" name="email" value="${datos?.email ?? ''}" required class="input">
@@ -251,7 +257,7 @@ const GestionEstudiantes = {
                     <input name="phone" value="${datos?.phone ?? ''}" class="input">
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label class="label">Tipo de documento</label>
                     <select name="document_type_id" required class="input">
@@ -274,7 +280,7 @@ const GestionEstudiantes = {
     _camposAcademicos(datos) {
         const { grados, estados } = this._catalogos;
         return `
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label class="label">Grado (opcional para egresados)</label>
                     <select name="grade_id" class="input">
@@ -289,7 +295,7 @@ const GestionEstudiantes = {
                     </select>
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label class="label">Fecha de ingreso</label>
                     <input type="date" name="start_date" value="${datos?.start_date ? datos.start_date.substring(0, 10) : ''}" required class="input">

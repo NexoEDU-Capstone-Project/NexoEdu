@@ -3,7 +3,7 @@ import * as AdminService from '../services/adminService.js';
 import * as InstitutionService from '../services/institutionService.js';
 import { ApiError } from '../modules/http.js';
 import { icon } from '../components/icons.js';
-import { encabezado, modalOverlay, modalHeader, vacio, iniciales, avatar, paginacion, skeletonTabla } from '../components/ui.js';
+import { encabezado, modalOverlay, modalHeader, vacio, iniciales, avatar, paginacion, skeletonTabla, abreviarInstitucion } from '../components/ui.js';
 import { toast } from '../components/toast.js';
 import { confirmDialog } from '../components/confirm.js';
 
@@ -103,7 +103,7 @@ const GestionAdmins = {
                 </td>
                 <td class="px-5 py-3.5">
                     ${a.institution_name
-                        ? `<span class="badge badge-green">${a.institution_name}</span>`
+                        ? `<span class="badge badge-green min-w-0 max-w-56" title="${a.institution_name}"><span class="truncate">${abreviarInstitucion(a.institution_name)}</span></span>`
                         : `<span class="badge badge-yellow">Sin asignar</span>`}
                 </td>
                 <td class="px-5 py-3.5">
@@ -115,7 +115,8 @@ const GestionAdmins = {
             </tr>`).join('');
 
         tablaContainer.innerHTML = `
-            <table class="w-full text-left">
+            <div class="overflow-x-auto">
+            <table class="w-full min-w-xl text-left">
                 <thead>
                     <tr class="text-xs uppercase tracking-wide text-ink-muted">
                         <th class="px-5 py-3 font-semibold">Usuario</th>
@@ -124,7 +125,8 @@ const GestionAdmins = {
                     </tr>
                 </thead>
                 <tbody>${filas}</tbody>
-            </table>`;
+            </table>
+            </div>`;
         pagCont.innerHTML = pag.html;
 
         tablaContainer.querySelectorAll('.btn-reasignar').forEach((btn) =>
@@ -164,7 +166,7 @@ const GestionAdmins = {
                     <label class="label">Institución (opcional)</label>
                     <select name="institution_id" class="select">
                         <option value="">Sin asignar por ahora</option>
-                        ${instituciones.map((i) => `<option value="${i.id}">${i.institution_name}</option>`).join('')}
+                        ${instituciones.map((i) => `<option value="${i.id}" title="${i.institution_name}">${abreviarInstitucion(i.institution_name)}</option>`).join('')}
                     </select>
                 </div>
                 <div id="form-error" class="hidden rounded-xl bg-red-50 p-3 text-sm text-red-600"></div>
@@ -216,7 +218,7 @@ const GestionAdmins = {
                     <label class="label">Nueva institución</label>
                     <select name="institution_id" required class="select">
                         <option value="">Selecciona una institución</option>
-                        ${instituciones.map((i) => `<option value="${i.id}">${i.institution_name}</option>`).join('')}
+                        ${instituciones.map((i) => `<option value="${i.id}" title="${i.institution_name}">${abreviarInstitucion(i.institution_name)}</option>`).join('')}
                     </select>
                 </div>
                 <div id="form-error" class="hidden rounded-xl bg-red-50 p-3 text-sm text-red-600"></div>

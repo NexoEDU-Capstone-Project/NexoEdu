@@ -4,7 +4,7 @@ import * as CatalogService from '../services/catalogService.js';
 import * as InstitutionService from '../services/institutionService.js';
 import { ApiError } from '../modules/http.js';
 import { icon } from '../components/icons.js';
-import { encabezado, iniciales, formatearFecha, semaforoActualizacion, skeletonBloque } from '../components/ui.js';
+import { encabezado, iniciales, formatearFecha, semaforoActualizacion, skeletonBloque, abreviarInstitucion } from '../components/ui.js';
 
 // Perfil del estudiante (solo lectura): sus datos personales/académicos y el
 // semáforo de última actualización. La edición solo es posible durante una
@@ -44,7 +44,7 @@ const MiPerfil = {
             if (datos.institution_id) {
                 try {
                     const institucion = await InstitutionService.obtener(datos.institution_id);
-                    nombreInstitucion = institucion.institution_name;
+                    nombreInstitucion = abreviarInstitucion(institucion.institution_name);
                 } catch {
                     // Si falla, dejamos el guion; no bloqueamos el resto del perfil por esto.
                 }

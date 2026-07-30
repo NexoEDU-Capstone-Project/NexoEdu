@@ -3,7 +3,7 @@ import * as InstitutionService from '../services/institutionService.js';
 import * as CampaignService from '../services/campaignService.js';
 import { ApiError } from '../modules/http.js';
 import { icon } from '../components/icons.js';
-import { statCard, estadoCampania, vacio, progressBar, skeletonCards, skeletonTabla } from '../components/ui.js';
+import { statCard, estadoCampania, vacio, progressBar, skeletonCards, skeletonTabla, abreviarInstitucion } from '../components/ui.js';
 
 // Dashboard del superadmin (Distrito): resumen del distrito, progreso de
 // actualización por campaña en curso, e instituciones registradas.
@@ -73,7 +73,7 @@ const DashboardSuperadmin = {
             stats.innerHTML = [
                 statCard({ label: 'Instituciones', valor: instituciones.length, iconName: 'school',
                     nota: `${icon('checkCircle', 'w-4 h-4')} ${conDirector} con director asignado` }),
-                statCard({ label: 'Campañas activas', valor: String(activas).padStart(2, '0'), iconName: 'megaphone',
+                statCard({ label: 'Campañas activas', valor: activas, iconName: 'megaphone',
                     nota: `${icon('clock', 'w-4 h-4')} ${campanias.length} en total`, notaColor: 'text-yellow-600' }),
                 statCard({ label: 'Campañas totales', valor: campanias.length, iconName: 'chart',
                     nota: `${icon('trendUp', 'w-4 h-4')} histórico del distrito` })
@@ -124,8 +124,12 @@ const DashboardSuperadmin = {
             <tr class="border-t border-navy-50 hover:bg-navy-50/40 transition-colors">
                 <td class="px-5 py-3.5">
                     <div class="flex items-center gap-3">
-                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-navy-50 text-navy-500">${icon('school', 'w-5 h-5')}</span>
-                        <p class="font-medium text-navy-600">${i.institution_name}</p>
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-navy-50 text-navy-500">
+                            ${i.logo_url
+                                ? `<img src="${i.logo_url}" alt="${i.institution_name}" class="h-full w-full object-cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="display:none" class="flex h-full w-full items-center justify-center">${icon('school', 'w-5 h-5')}</div>`
+                                : icon('school', 'w-5 h-5')}
+                        </span>
+                        <p class="font-medium text-navy-600" title="${i.institution_name}">${abreviarInstitucion(i.institution_name)}</p>
                     </div>
                 </td>
                 <td class="px-5 py-3.5 text-sm text-ink-soft">${i.director ?? '—'}</td>
@@ -133,7 +137,8 @@ const DashboardSuperadmin = {
             </tr>`).join('');
 
         return `
-            <table class="w-full text-left">
+            <div class="overflow-x-auto">
+            <table class="w-full min-w-lg text-left">
                 <thead>
                     <tr class="text-xs uppercase tracking-wide text-ink-muted">
                         <th class="px-5 py-3 font-semibold">Institución</th>
@@ -142,7 +147,8 @@ const DashboardSuperadmin = {
                     </tr>
                 </thead>
                 <tbody>${filas}</tbody>
-            </table>`;
+            </table>
+            </div>`;
     }
 };
 
