@@ -31,6 +31,18 @@ const GestionCampanias = {
                 subtitulo: 'Lanza y monitorea campañas de actualización de datos.',
                 acciones: `<button id="btn-nueva" class="btn btn-primary">${icon('rocket', 'w-4 h-4')} Nueva campaña</button>`
             })}
+            <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div class="relative flex-1">
+                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-navy-300">${icon('search', 'w-4 h-4')}</span>
+                    <input id="buscar" class="input pl-9" placeholder="Buscar campaña por título...">
+                </div>
+                <select id="filtro-estado" class="select sm:w-52">
+                    <option value="">Todos los estados</option>
+                    <option value="En curso">En curso</option>
+                    <option value="Programada">Programada</option>
+                    <option value="Finalizada">Finalizada</option>
+                </select>
+            </div>
             <div id="lista-campanias" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">${skeletonCards(6, 'h-72')}</div>
             <div id="modal-container"></div>
             <!-- Contenedor aparte para la ficha del estudiante: así se apila
@@ -39,7 +51,16 @@ const GestionCampanias = {
             <div id="ficha-container"></div>
         `;
 
+        this._filtros = { q: '', estado: '' };
         contenido.querySelector('#btn-nueva').addEventListener('click', () => this._abrirModalCrear());
+        contenido.querySelector('#buscar').addEventListener('input', (e) => {
+            this._filtros.q = e.target.value.toLowerCase();
+            if (this._campanias) this._pintarLista(this._campanias);
+        });
+        contenido.querySelector('#filtro-estado').addEventListener('change', (e) => {
+            this._filtros.estado = e.target.value;
+            if (this._campanias) this._pintarLista(this._campanias);
+        });
 
         // Carga en segundo plano; NO se hace await para mostrar el shell (con skeleton) YA.
         this._init();
@@ -77,6 +98,8 @@ const GestionCampanias = {
 
     _pintarLista(campanias) {
         const lista = this._contenido.querySelector('#lista-campanias');
+        // Se guarda la lista COMPLETA: los filtros se aplican al pintar, así no
+        // se pierden datos al filtrar y no hace falta volver a pedirlos.
         this._campanias = campanias;
 
         if (campanias.length === 0) {
@@ -85,10 +108,28 @@ const GestionCampanias = {
             return;
         }
 
+        const { q, estado } = this._filtros ?? { q: '', estado: '' };
+        const visibles = campanias.filter((c) => {
+            const coincideQ = !q || (c.title || '').toLowerCase().includes(q);
+            const coincideEstado = !estado || estadoCampania(c.start_date, c.end_date).texto === estado;
+            return coincideQ && coincideEstado;
+        });
+
+        if (visibles.length === 0) {
+            lista.className = '';
+            lista.innerHTML = vacio('Ninguna campaña coincide con los filtros.', 'megaphone');
+            return;
+        }
+
         lista.className = 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3';
-        lista.innerHTML = campanias
+        lista.innerHTML = visibles
             .map((c) => campaignCard(c, {
                 dataId: c.id,
+                // Contenedor para el progreso: la tarjeta se pinta ya y la métrica
+                // llega después (ver _cargarMetricasEnTarjetas).
+                extra: `<div class="mt-3 border-t border-navy-50 pt-3" data-metricas="${c.id}">
+                            <div class="h-8 animate-pulse rounded-lg bg-navy-50/60"></div>
+                        </div>`,
                 acciones: `
                     <button class="btn-detalle btn btn-outline flex-1" data-id="${c.id}">${icon('chart', 'w-4 h-4')} Ver detalle</button>
                     ${c.puede_editar ? `
@@ -106,6 +147,31 @@ const GestionCampanias = {
         lista.querySelectorAll('.btn-eliminar').forEach((btn) =>
             btn.addEventListener('click', () => this._confirmarEliminar(btn.dataset.id))
         );
+
+        this._cargarMetricasEnTarjetas(visibles);
+    },
+
+    // Progreso de cada campaña dentro de su tarjeta. Se piden todas las métricas
+    // en paralelo DESPUÉS de pintar la lista, para no retrasar lo visible.
+    async _cargarMetricasEnTarjetas(campanias) {
+        const lista = this._contenido.querySelector('#lista-campanias');
+        const metricas = await Promise.all(
+            campanias.map((c) => CampaignService.metricas(c.id).catch(() => null))
+        );
+
+        campanias.forEach((c, i) => {
+            const cont = lista.querySelector(`[data-metricas="${c.id}"]`);
+            if (!cont) return;   // la lista pudo re-pintarse mientras cargaba
+            const m = metricas[i];
+            if (!m) {
+                cont.innerHTML = '';
+                return;
+            }
+            // El superadmin recibe { totales: {...} }; el admin, la forma plana.
+            const elegibles = m.totales?.total_elegibles ?? m.total_elegibles ?? 0;
+            const actualizados = m.totales?.total_actualizados ?? m.total_actualizados ?? 0;
+            cont.innerHTML = progressBar({ titulo: 'Actualización', actualizados, elegibles });
+        });
     },
 
     _mostrarMensaje(texto, tipo = 'success') {
