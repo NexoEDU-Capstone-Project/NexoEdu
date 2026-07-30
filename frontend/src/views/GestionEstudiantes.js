@@ -2,6 +2,7 @@ import { renderLayout } from './Layout.js';
 import * as StudentService from '../services/studentService.js';
 import * as CatalogService from '../services/catalogService.js';
 import { crearSelectorBarrio } from '../components/SelectorBarrio.js';
+import { abrirFichaEstudiante } from '../components/FichaEstudiante.js';
 import { ApiError } from '../modules/http.js';
 import { icon } from '../components/icons.js';
 import { encabezado, vacio, iniciales, avatar, semaforoPill, semaforoActualizacion, skeletonTabla } from '../components/ui.js';
@@ -168,14 +169,14 @@ const GestionEstudiantes = {
                              alineadas entre un curso y otro (cada grupo es su propia
                              tabla) y hace que los nombres largos se trunquen en vez
                              de ensanchar la columna. -->
-                        <table class="w-full min-w-2xl table-fixed text-left">
+                        <table class="w-full min-w-3xl table-fixed text-left">
                             <thead>
                                 <tr class="text-xs uppercase tracking-wide text-ink-muted">
-                                    <th class="w-[32%] px-5 py-3 font-semibold">Estudiante</th>
+                                    <th class="w-[28%] px-5 py-3 font-semibold">Estudiante</th>
                                     <th class="w-[16%] px-5 py-3 font-semibold">Documento</th>
                                     <th class="w-[20%] px-5 py-3 font-semibold">Última actualización</th>
-                                    <th class="w-[14%] px-5 py-3 font-semibold">Estado</th>
-                                    <th class="w-[18%] px-5 py-3 text-right font-semibold">Acciones</th>
+                                    <th class="w-[16%] px-5 py-3 font-semibold">Estado</th>
+                                    <th class="w-[20%] px-5 py-3 text-right font-semibold">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>${alumnos.map((e) => this._fila(e)).join('')}</tbody>
@@ -185,6 +186,14 @@ const GestionEstudiantes = {
                 </div>`;
         }).join('');
 
+        // Ver la ficha completa (mismo modal que en campañas y en el perfil de
+        // institución) antes de decidir si editar o eliminar.
+        const modalContainer = this._contenido.querySelector('#modal-container');
+        cont.querySelectorAll('.btn-ver').forEach((btn) =>
+            btn.addEventListener('click', () =>
+                abrirFichaEstudiante(btn.dataset.id, { modalContainer, catalogos: this._catalogos })
+            )
+        );
         cont.querySelectorAll('.btn-editar').forEach((btn) =>
             btn.addEventListener('click', () => this._abrirModalEditar(btn.dataset.id))
         );
@@ -210,9 +219,12 @@ const GestionEstudiantes = {
                 <td class="px-5 py-3.5">${semaforoPill(e.ultima_actualizacion)}</td>
                 <td class="px-5 py-3.5"><span class="badge ${estado.toUpperCase() === 'EGRESADO' ? 'badge-navy' : estado.toUpperCase() === 'ACTIVO' ? 'badge-green' : 'badge-yellow'}">${estado}</span></td>
                 <td class="px-5 py-3.5">
-                    <div class="flex items-center justify-end gap-2">
-                        <button class="btn-editar btn btn-outline" data-id="${e.people_id}">${icon('pencil', 'w-4 h-4')} Editar</button>
-                        <button class="btn-eliminar btn btn-ghost text-red-500 hover:bg-red-50" data-id="${e.people_id}" aria-label="Eliminar">${icon('logout', 'w-4 h-4')}</button>
+                    <!-- Acciones solo-ícono (con title/aria-label): con tres botones,
+                         el texto no cabe en la columna y se montaba sobre el estado. -->
+                    <div class="flex items-center justify-end gap-1 whitespace-nowrap">
+                        <button class="btn-ver btn btn-ghost px-2 text-navy-500 hover:bg-navy-50" data-id="${e.people_id}" title="Ver perfil" aria-label="Ver perfil">${icon('eye', 'w-4 h-4')}</button>
+                        <button class="btn-editar btn btn-ghost px-2 text-navy-500 hover:bg-navy-50" data-id="${e.people_id}" title="Editar" aria-label="Editar">${icon('pencil', 'w-4 h-4')}</button>
+                        <button class="btn-eliminar btn btn-ghost px-2 text-red-500 hover:bg-red-50" data-id="${e.people_id}" title="Eliminar" aria-label="Eliminar">${icon('logout', 'w-4 h-4')}</button>
                     </div>
                 </td>
             </tr>`;

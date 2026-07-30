@@ -3,6 +3,7 @@ import * as CampaignService from '../services/campaignService.js';
 import * as CatalogService from '../services/catalogService.js';
 import * as InstitutionService from '../services/institutionService.js';
 import { crearEditorCriteria } from '../components/EditorCriteria.js';
+import { abrirFichaEstudiante } from '../components/FichaEstudiante.js';
 import { ApiError } from '../modules/http.js';
 import Auth from '../modules/auth.js';
 import { icon } from '../components/icons.js';
@@ -32,6 +33,10 @@ const GestionCampanias = {
             })}
             <div id="lista-campanias" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">${skeletonCards(6, 'h-72')}</div>
             <div id="modal-container"></div>
+            <!-- Contenedor aparte para la ficha del estudiante: así se apila
+                 SOBRE el modal de detalle de campaña en vez de reemplazarlo
+                 (al cerrarla, el detalle sigue abierto detrás). -->
+            <div id="ficha-container"></div>
         `;
 
         contenido.querySelector('#btn-nueva').addEventListener('click', () => this._abrirModalCrear());
@@ -231,11 +236,20 @@ const GestionCampanias = {
                         ${avatar(iniciales(u.first_name, u.last_name), u.people_id)}
                         <div class="min-w-0">
                             <p class="truncate font-medium text-navy-600">${u.first_name} ${u.last_name}</p>
-                            <p class="truncate text-xs text-ink-muted">${gradoNombre(u.grade_id)}</p>
+                            <p class="truncate text-xs text-ink-muted">${gradoNombre(u.grade_id)} · ${formatearFechaCol(u.updated_at)}</p>
                         </div>
                     </div>
-                    <span class="shrink-0 text-xs text-ink-muted">${formatearFechaCol(u.updated_at)}</span>
+                    <button class="btn-ver-perfil btn btn-outline shrink-0" data-id="${u.people_id}">${icon('eye', 'w-4 h-4')} Ver perfil</button>
                 </div>`).join('') + `</div>`;
+
+            // Ver la ficha completa de quien actualizó: es el propósito de la
+            // campaña, así que desde aquí se llega a toda su información.
+            const fichaContainer = this._contenido.querySelector('#ficha-container');
+            updEl.querySelectorAll('.btn-ver-perfil').forEach((btn) =>
+                btn.addEventListener('click', () =>
+                    abrirFichaEstudiante(btn.dataset.id, { modalContainer: fichaContainer, catalogos: this._catalogos })
+                )
+            );
         }
     },
 
